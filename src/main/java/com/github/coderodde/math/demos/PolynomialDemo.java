@@ -107,10 +107,6 @@ public final class PolynomialDemo {
         for (String termString : termsStrings) {
             termString = termString.trim();
             
-            if (termString.isEmpty()) {
-                throw new IllegalArgumentException("Missing term.");
-            }
-            
             final double coefficient;
             
             try {
@@ -118,7 +114,7 @@ public final class PolynomialDemo {
             } catch (final NumberFormatException ex) {
                 final String exceptionMessage =
                         String.format(
-                                "coefficient \"%s\" is not a real number.", 
+                                "coefficient \"%s\" is not a real number", 
                                 termString);
                 
                 throw new IllegalArgumentException(exceptionMessage);
