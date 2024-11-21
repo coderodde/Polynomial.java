@@ -1,9 +1,5 @@
 package com.github.coderodde.math;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -63,7 +59,7 @@ public final class PolynomialTest {
         
         // (x^3 - 2x^2 + 3x) + (4x^2 - 8x + 12) = x^3 + 2x^2 - 5x + 12
         Polynomial product = p1.multiply(p2); 
-        System.out.println(product);
+        
         assertEquals(3, product.getDegree());
         
         Polynomial expected = new Polynomial(12, -5, 2, 1);
@@ -82,28 +78,26 @@ public final class PolynomialTest {
         assertEquals(0, p.evaluate(-3), E);
     }
     
-//    @Test
-    public void testToString() {
-        Polynomial p;
+    @Test
+    public void builder() {
+        final Polynomial p = Polynomial.getPolynomialBuilder()
+                                       .add(10, 10)
+                                       .add(5000, 5000)
+                                       .build();
         
-        p = new Polynomial();
+        assertEquals(5000, p.getDegree());  
+        assertEquals(10, p.getCoefficient(10), E);
+        assertEquals(5000, p.getCoefficient(5000), E);
+    }
+    
+    @Test
+    public void emptyPolynomial() {
+        Polynomial p = new Polynomial();
         
-        assertEquals("0.0", String.format("%.1s", p.toString()));
+        assertEquals(1, p.length());
+        assertEquals(0, p.getDegree());
         
-        p = new Polynomial(-2);
-        
-        assertEquals("-2", p.toString());
-        
-        p = new Polynomial(-2, 3);
-        
-        assertEquals("3x - 2", p.toString());
-        
-        p = new Polynomial(-2, -3);
-        
-        assertEquals("-3x - 2", p.toString());
-        
-        p = new Polynomial(-2, 0, 5);
-        
-        assertEquals("5x^2 - 2", p.toString());
+        assertEquals(0.0, p.getCoefficient(0), E);
+        assertEquals(0.0, p.evaluate(10.0), E);
     }
 }

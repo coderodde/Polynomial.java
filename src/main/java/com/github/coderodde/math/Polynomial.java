@@ -1,6 +1,8 @@
 package com.github.coderodde.math;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class implements a polynomial.
@@ -285,6 +287,39 @@ public final class Polynomial {
         }
         
         return sb.toString().replaceAll(",", ".");
+    }
+    
+    public static Builder getPolynomialBuilder() {
+        return new Builder();
+    }
+    
+    public static final class Builder {
+        private final Map<Integer, Double> map = new HashMap<>();
+        private int maximumCoefficientIndex = 0;
+        
+        public Builder add(final int coefficientIndex,
+                                     final double coefficient) {
+            
+            this.maximumCoefficientIndex = 
+                    Math.max(this.maximumCoefficientIndex,
+                             coefficientIndex);
+            
+            map.put(coefficientIndex, 
+                    coefficient);
+            
+            return this;
+        }
+        
+        public Polynomial build() {
+            final double[] coefficients =
+                    new double[maximumCoefficientIndex + 1];
+            
+            for (final Map.Entry<Integer, Double> e : map.entrySet()) {
+                coefficients[e.getKey()] = e.getValue();
+            }
+            
+            return new Polynomial(coefficients);
+        }
     }
     
     private void validateX(final double x) {
