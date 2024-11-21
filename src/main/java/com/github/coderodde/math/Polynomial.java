@@ -166,12 +166,12 @@ public final class Polynomial {
      * @return the product of this and the input polynomials. 
      */
     public Polynomial multiply(final Polynomial othr) {
-        final int coefficientArrayLength = this.getDegree() 
-                                         * othr.getDegree() 
-                                         + 1;
+        
+        final int coefficientArrayLength = this.length() 
+                                         + othr.length()
+                                         - 1;
         
         final double[] coefficientArray = new double[coefficientArrayLength];
-        int coefficientIndex = 0;
         
         for (int index1 = 0; 
                  index1 < this.length();
@@ -181,9 +181,11 @@ public final class Polynomial {
                      index2 < othr.length();
                      index2++) {
                 
-                coefficientArray[coefficientIndex++] =
-                        this.getCoefficient(index1) *
-                        othr.getCoefficient(index2);
+                final double coefficient1 = this.getCoefficient(index1);
+                final double coefficient2 = othr.getCoefficient(index2);
+                
+                coefficientArray[index1 + index2] += coefficient1
+                                                   * coefficient2;
             }
         }
         
@@ -247,6 +249,10 @@ public final class Polynomial {
     
     @Override
     public String toString() {
+        if (getDegree() == 0) {
+            return String.format("%f", coefficients[0]).replace(",", ".");
+        }
+        
         final StringBuilder sb = new StringBuilder();
         
         boolean first = true;
@@ -255,7 +261,7 @@ public final class Polynomial {
             if (first) {
                 first = false;
                 sb.append(getCoefficient(pow))
-                  .append("^")
+                  .append("x^")
                   .append(pow);
             } else {
                 final double coefficient = getCoefficient(pow);
@@ -272,13 +278,13 @@ public final class Polynomial {
                 }
                 
                 if (pow > 0) {
-                    sb.append("^")
+                    sb.append("x^")
                       .append(pow);
                 }
             }
         }
         
-        return sb.toString();
+        return sb.toString().replaceAll(",", ".");
     }
     
     private void validateX(final double x) {
