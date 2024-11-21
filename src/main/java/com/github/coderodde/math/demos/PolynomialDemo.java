@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.Scanner;
 
 /**
- *
+ * This is demonstration program for the {@link Polynomial} class.
+ * 
  * @version 1.0.0 (Nov 21, 2024)
  * @since 1.0.0 (Nov 21, 2024)
  */
@@ -30,7 +31,9 @@ public final class PolynomialDemo {
             try {
                 if (line.contains("save")) {
                     saveImpl(line);
-                } if (line.contains("+")) {
+                } else if (line.contains("print")) {
+                    print(line);
+                } else if (line.contains("+")) {
                     sumImpl(line);
                 } else if (line.contains("*")) {
                     productImpl(line);
@@ -38,16 +41,21 @@ public final class PolynomialDemo {
                     parsePolynomial(line);
                 }
             } catch (final Exception ex) {
-                System.out.printf(">>> Exception: %s!", ex.getMessage());
+                System.err.printf(">>> Exception: %s!", ex.getMessage());
+                System.out.println();
             }
         }
     }
     
     private static void saveImpl(final String line) {
         final String[] parts = line.split("\\s+");
-        final String polynommialName = parts[0];
+        final String polynommialName = parts[1];
         environment.put(polynommialName,
                         previousPolynomial);
+    }
+    
+    private static void print(final String line) {
+        System.out.println(environment.get(line.split("\\s+")[1]));
     }
     
     private static void sumImpl(final String line) {
@@ -60,8 +68,8 @@ public final class PolynomialDemo {
             throw new IllegalArgumentException(exceptionMessage);
         }
         
-        final String polynomialName1 = parts[0];
-        final String polynomialName2 = parts[1];
+        final String polynomialName1 = parts[0].trim();
+        final String polynomialName2 = parts[1].trim();
         final Polynomial polynomial1 = environment.get(polynomialName1);
         final Polynomial polynomial2 = environment.get(polynomialName2);
         
@@ -71,7 +79,7 @@ public final class PolynomialDemo {
     }
     
     private static void productImpl(final String line) {
-        final String[] parts = line.split("\\+");
+        final String[] parts = line.split("\\*");
         
         if (parts.length != 2) {
             final String exceptionMessage = 
@@ -80,8 +88,8 @@ public final class PolynomialDemo {
             throw new IllegalArgumentException(exceptionMessage);
         }
         
-        final String polynomialName1 = parts[0];
-        final String polynomialName2 = parts[1];
+        final String polynomialName1 = parts[0].trim();
+        final String polynomialName2 = parts[1].trim();
         final Polynomial polynomial1 = environment.get(polynomialName1);
         final Polynomial polynomial2 = environment.get(polynomialName2);
         
@@ -91,7 +99,7 @@ public final class PolynomialDemo {
     }
     
     private static Polynomial parsePolynomial(final String line) {
-        final String[] termsStrings = line.split("\\+|-");
+        final String[] termsStrings = line.split("\\s+");
         final Polynomial.Builder builder = Polynomial.getPolynomialBuilder();
         
         int coefficientIndex = 0;
@@ -120,6 +128,9 @@ public final class PolynomialDemo {
                         coefficient);
         }
         
-        return builder.build();
+        final Polynomial p = builder.build();
+        previousPolynomial = p;
+        System.out.printf(">>> %s\n", p);
+        return p;
     }
 }
