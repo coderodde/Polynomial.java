@@ -55,23 +55,46 @@ public final class PolynomialMultiplier {
         return new Polynomial(coefficientArray);
     }
     
-    public static Polynomial multiplyViaKaratsuba(final Polynomial p1,
-                                                  final Polynomial p2) {
+    public static Polynomial multiplyViaKaratsuba(Polynomial p1,
+                                                  Polynomial p2) {
         
         final int n = Math.max(p1.length(), 
                                p2.length());
         
-        p1.setLength(n);
-        p2.setLength(n);
+        p1 = p1.setLength(n);
+        p2 = p2.setLength(n);
         
-        return multiplyViaKaratsubaImpl(p1, p2);
+        final BigDecimal[] productCoefficients = 
+                multiplyViaKaratsubaImpl(p1, p2).coefficients;
+        
+        int i = productCoefficients.length - 1;
+        
+        final int scale = productCoefficients[i].scale();
+        final BigDecimal MY_ZERO = BigDecimal.valueOf(0L).setScale(scale);
+        
+        for (; i >= 0; i--) {
+            if (!productCoefficients[i].equals(MY_ZERO)) {
+                break;
+            }
+        }
+        
+        final BigDecimal[] coefficients = new BigDecimal[i + 1];
+        
+        System.arraycopy(
+                productCoefficients, 
+                0, 
+                coefficients, 
+                0, 
+                coefficients.length);
+        
+        return new Polynomial(coefficients);
     }
     
     private static Polynomial multiplyViaKaratsubaImpl(final Polynomial p,
                                                        final Polynomial q) {
             
         final int n = Math.max(p.length(),
-                               q.length()) - 1;
+                               q.length());
         
         if (n == 0 || n == 1) {
             return multiplyViaNaive(p, q);

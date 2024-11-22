@@ -37,8 +37,8 @@ public final class Polynomial {
      * coefficient of the term with degree {@code i}, so the constant term 
      * appears at {@code coefficients[0]}.
      */
-    private final BigDecimal[] coefficients;
-    
+    final BigDecimal[] coefficients;
+     
     /**
      * Constructs a polynomial with given coefficients. The coefficients of the 
      * constant term is {@code coefficients[0]} and the coefficient of the 
@@ -388,9 +388,9 @@ public final class Polynomial {
      * 
      * @param requestedLength the requested length in number of coefficients.
      */
-    void setLength(final int requestedLength) {
+    Polynomial setLength(final int requestedLength) {
         if (requestedLength <= length()) {
-            return;
+            return this;
         }
         
         final BigDecimal[] nextCoefficients = new BigDecimal[requestedLength];
@@ -407,6 +407,8 @@ public final class Polynomial {
                 length(),
                 requestedLength,
                 BigDecimal.ZERO);
+        
+        return new Polynomial(nextCoefficients);
     }
     
     /**
