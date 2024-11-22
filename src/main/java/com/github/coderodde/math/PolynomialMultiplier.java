@@ -1,6 +1,7 @@
 package com.github.coderodde.math;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 /**
  * This class contains some polynomial multiplication algorithms.
@@ -27,6 +28,13 @@ public final class PolynomialMultiplier {
         final BigDecimal[] coefficientArray = 
                 new BigDecimal[coefficientArrayLength];
         
+        // Initialize the result coefficient array:
+        Arrays.fill(
+                coefficientArray, 
+                0, 
+                coefficientArrayLength, 
+                BigDecimal.ZERO);
+        
         for (int index1 = 0;
                  index1 < p1.length(); 
                  index1++) {
@@ -40,8 +48,7 @@ public final class PolynomialMultiplier {
                 
                 coefficientArray[index1 + index2] = 
                         coefficientArray[index1 + index2]
-                        .add(coefficient1)
-                        .multiply(coefficient2);
+                        .add(coefficient1.multiply(coefficient2));
             }
         }
         
