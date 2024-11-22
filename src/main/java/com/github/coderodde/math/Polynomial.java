@@ -1,6 +1,7 @@
 package com.github.coderodde.math;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -257,7 +258,10 @@ public final class Polynomial {
                  pow < length(); 
                  pow++) { 
             
-            coefficients[pow + 1] = integrateTerm(coefficients[pow], pow);
+            coefficients[pow + 1] = 
+                    integrateTerm(
+                            this.coefficients[pow],
+                            pow);
         }
         
         return new Polynomial(coefficients);
@@ -288,13 +292,13 @@ public final class Polynomial {
                 this.coefficients,
                 0,
                 coefficients, 
-                length(),
-                m);
+                m,
+                length());
         
         Arrays.fill(
                 coefficients, 
-                length(), 
-                coefficients.length, 
+                0, 
+                m, 
                 BigDecimal.ZERO);
         
         return new Polynomial(coefficients);
@@ -303,7 +307,12 @@ public final class Polynomial {
     private BigDecimal integrateTerm(final BigDecimal coefficient, 
                                      final int pow) {
         final BigDecimal powBigDecimal = BigDecimal.valueOf(pow);
-        return coefficient.divide(powBigDecimal.add(BigDecimal.ONE));
+        
+        return coefficient.divide(
+                powBigDecimal
+                        .add(BigDecimal.ONE),
+                         coefficient.scale(),
+                         RoundingMode.CEILING);
     }
     
     private BigDecimal getDerivateCoefficient(final BigDecimal coefficient,

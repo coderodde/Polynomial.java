@@ -70,7 +70,65 @@ public final class PolynomialTest {
     }
     
     @Test
-    public void multiply() {
+    public void derivate() {
+        Polynomial p = 
+                Polynomial
+                        .getPolynomialBuilder()
+                        .add(0, BigDecimal.valueOf(4))
+                        .add(1, BigDecimal.valueOf(-3))
+                        .add(2, BigDecimal.valueOf(5))
+                        .build();
+        
+        Polynomial d = p.derivate();
+        
+        assertEquals(2, d.length());
+        
+        Polynomial expected = 
+                Polynomial
+                    .getPolynomialBuilder()
+                    .add(0, BigDecimal.valueOf(-3))
+                    .add(1, BigDecimal.valueOf(10))
+                    .build();
+        
+        assertEquals(expected, d);
+    }
+    
+    @Test
+    public void integrate() {
+        // 6x^2 - 8x + 4
+        Polynomial p = 
+                Polynomial
+                        .getPolynomialBuilder()
+                        .add(0, BigDecimal.valueOf(4.0))
+                        .add(1, BigDecimal.valueOf(8.0))
+                        .add(2, BigDecimal.valueOf(6.0))
+                        .build();
+        
+        p.setScale(2);
+        
+        // 2x^3 - 4x^2 + 4x + 16
+        Polynomial i = p.integrate(BigDecimal.valueOf(16.0));
+        
+        i.setScale(2);
+        
+        assertEquals(4, i.length());
+        
+        Polynomial expected = 
+                Polynomial
+                    .getPolynomialBuilder()
+                    .add(0, BigDecimal.valueOf(16.0))
+                    .add(1, BigDecimal.valueOf(4.0))
+                    .add(2, BigDecimal.valueOf(4.0))
+                    .add(3, BigDecimal.valueOf(2.0))
+                    .build();
+        
+        expected.setScale(2);
+        
+        assertEquals(expected, i);
+    }
+    
+    @Test
+    public void multiplyNaive() {
         // x^2 - 2x + 3
         Polynomial p1 = 
                 Polynomial
@@ -99,6 +157,73 @@ public final class PolynomialTest {
         expected.setScale(2);
         
         assertEquals(expected, product);
+    }
+    
+    @Test
+    public void multiplyKaratsuba() {
+        // x^2 - 2x + 3
+        Polynomial p1 = 
+                Polynomial
+                        .getPolynomialBuilder()
+                        .add(0, BigDecimal.valueOf(3).setScale(1))
+                        .add(1, BigDecimal.valueOf(-2).setScale(1))
+                        .add(2, BigDecimal.valueOf(1).setScale(1))
+                        .build();
+        // x + 4
+        Polynomial p2 = 
+                Polynomial
+                        .getPolynomialBuilder()
+                        .add(0, BigDecimal.valueOf(4).setScale(1))
+                        .add(1, BigDecimal.valueOf(1).setScale(1))
+                        .build();
+        
+        // (x^3 - 2x^2 + 3x) + (4x^2 - 8x + 12) = x^3 + 2x^2 - 5x + 12
+        Polynomial product = PolynomialMultiplier.multiplyViaKaratsuba(p1, p2); 
+        
+        assertEquals(3, product.getDegree());
+        
+        Polynomial expected = Polynomial.getPolynomialDoubleBuilder()
+                                        .buildFrom(12, -5, 2, 1);
+        
+        product.setScale(2);
+        expected.setScale(2);
+        
+        assertEquals(expected, product);
+    }
+    
+    @Test
+    public void negate() {
+        Polynomial p = 
+                Polynomial
+                        .getPolynomialDoubleBuilder()
+                        .buildFrom(2, -3, 4, -5);
+        
+        Polynomial expected = 
+                Polynomial
+                        .getPolynomialDoubleBuilder()
+                        .buildFrom(-2, 3, -4, 5);
+        
+        assertEquals(expected, p.negate());
+    }
+    
+    @Test
+    public void shift() {
+        Polynomial p = 
+                Polynomial
+                        .getPolynomialDoubleBuilder()
+                        .buildFrom(2, -3, 4, -5);
+        
+        Polynomial expected = 
+                Polynomial
+                        .getPolynomialDoubleBuilder()
+                        .buildFrom(0, 0, 2, -3, 4, -5);
+        
+        p = p.shift(2);
+        
+        p.setScale(2);
+        expected.setScale(2);
+        
+        assertEquals(expected, p);
     }
     
     @Test

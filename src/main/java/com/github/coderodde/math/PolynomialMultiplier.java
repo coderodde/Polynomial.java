@@ -110,6 +110,7 @@ public final class PolynomialMultiplier {
                                          final int m) {
         t  = t.shift(m);
         r4 = r4.shift(2 * m);
+        
         return r1.sum(t).sum(r4);
     }
     
