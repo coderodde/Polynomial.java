@@ -192,14 +192,21 @@ public final class Polynomial {
     }
 
     /**
-     * Sets the scale of each coefficient.
+     * Copies this polynomial with the input scale applied to all coefficients 
+     * in this polynomial.
      * 
      * @param scale the next scale to use.
+     * 
+     * @return a new scaled polynomial copy.
      */
-    public void setScale(final int scale) {
-        for (int i = 0; i < coefficients.length; i++) {
-            coefficients[i] = coefficients[i].setScale(scale);
+    public Polynomial setScale(final int scale) {
+        final BigDecimal[] coefficients = new BigDecimal[length()];
+        
+        for (int i = 0; i < length(); i++) {
+            coefficients[i] = this.coefficients[i].setScale(scale);
         }
+        
+        return new Polynomial(coefficients);
     }
     
     /**

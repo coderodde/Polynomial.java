@@ -1,12 +1,15 @@
 package com.github.coderodde.math;
 
 import java.math.BigDecimal;
+import java.util.Random;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 public final class PolynomialTest {
     
-    private static final double E = 1E-3;
+    private static final int MAX_POLINOMIAL_LENGTH = 10;
+    private static final long MIN_COEFFICIENT = -10L;
+    private static final long MAX_COEFFICIENT = +10L;
     
     @Test
     public void evaluate1() {
@@ -104,12 +107,12 @@ public final class PolynomialTest {
                         .add(2, BigDecimal.valueOf(6.0))
                         .build();
         
-        p.setScale(2);
+        p = p.setScale(2);
         
         // 2x^3 - 4x^2 + 4x + 16
         Polynomial i = p.integrate(BigDecimal.valueOf(16.0));
         
-        i.setScale(2);
+        i = i.setScale(2);
         
         assertEquals(4, i.length());
         
@@ -122,7 +125,7 @@ public final class PolynomialTest {
                     .add(3, BigDecimal.valueOf(2.0))
                     .build();
         
-        expected.setScale(2);
+        expected = expected.setScale(2);
         
         assertEquals(expected, i);
     }
@@ -153,8 +156,8 @@ public final class PolynomialTest {
         Polynomial expected = Polynomial.getPolynomialDoubleBuilder()
                                         .buildFrom(12, -5, 2, 1);
         
-        product.setScale(2);
-        expected.setScale(2);
+        product  = product .setScale(2);
+        expected = expected.setScale(2);
         
         assertEquals(expected, product);
     }
@@ -185,8 +188,8 @@ public final class PolynomialTest {
         Polynomial expected = Polynomial.getPolynomialDoubleBuilder()
                                         .buildFrom(12, -5, 2, 1);
         
-        product.setScale(2);
-        expected.setScale(2);
+        product  = product .setScale(2);
+        expected = expected.setScale(2);
         
         assertEquals(expected, product);
     }
@@ -220,8 +223,8 @@ public final class PolynomialTest {
         
         p = p.shift(2);
         
-        p.setScale(2);
-        expected.setScale(2);
+        p = p.setScale(2);
+        expected = expected.setScale(2);
         
         assertEquals(expected, p);
     }
@@ -270,5 +273,51 @@ public final class PolynomialTest {
     public void throwDoubleBuilderOnInfiniteCoefficient() {
         Polynomial.getPolynomialDoubleBuilder()
                   .add(4, Double.NEGATIVE_INFINITY);
+    }
+    
+    @Test
+    public void bruteForceKaratsubaVsNaive() {
+        final Random random = new Random(13L);
+        
+        for (int iter = 0; iter < 100; iter++) {
+            final Polynomial p1 = getRandomPolynomial(random).setScale(2);
+            final Polynomial p2 = getRandomPolynomial(random).setScale(2);
+            
+            final Polynomial product1 = 
+                    PolynomialMultiplier
+                            .multiplyViaNaive(p1,
+                                              p2).setScale(2);
+            
+            final Polynomial product2 = 
+                    PolynomialMultiplier
+                            .multiplyViaKaratsuba(p1,
+                                                  p2).setScale(2);
+            
+            assertEquals(product1,
+                         product2);
+            
+            System.out.println(iter);
+        }
+    }
+    
+    private static Polynomial getRandomPolynomial(final Random random) {
+        final int polynomialLength = 1 + random.nextInt(MAX_POLINOMIAL_LENGTH);
+        final Polynomial.Builder builder = Polynomial.getPolynomialBuilder();
+        
+        for (int i = 0; i < polynomialLength; i++) {
+            builder.add(i, getRandomCoefficient(random));
+        }
+        
+        return builder.build();
+    }
+    
+    private static BigDecimal getRandomCoefficient(final Random random) {
+        final long longCoefficient = MIN_COEFFICIENT 
+                                   + random.nextLong(
+                                           MAX_COEFFICIENT 
+                                         - MIN_COEFFICIENT
+                                         + 1);
+        
+        return BigDecimal.valueOf(longCoefficient);
     }
 }
