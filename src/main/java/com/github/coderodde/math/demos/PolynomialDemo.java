@@ -1,6 +1,7 @@
 package com.github.coderodde.math.demos;
 
 import com.github.coderodde.math.Polynomial;
+import com.github.coderodde.math.PolynomialMultiplier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -8,7 +9,7 @@ import java.util.Scanner;
 /**
  * This is demonstration program for the {@link Polynomial} class.
  * 
- * @version 1.0.0 (Nov 21, 2024)
+ * @version 1.0.1 (Nov 22, 2024)
  * @since 1.0.0 (Nov 21, 2024)
  */
 public final class PolynomialDemo {
@@ -93,14 +94,20 @@ public final class PolynomialDemo {
         final Polynomial polynomial1 = environment.get(polynomialName1);
         final Polynomial polynomial2 = environment.get(polynomialName2);
         
-        final Polynomial product = polynomial1.multiply(polynomial2);
+        final Polynomial product = 
+                PolynomialMultiplier
+                        .multiplyViaNaive(
+                                polynomial1, 
+                                polynomial2);
+        
         previousPolynomial = product;
         System.out.println(product);
     }
     
     private static Polynomial parsePolynomial(final String line) {
         final String[] termsStrings = line.split("\\s+");
-        final Polynomial.Builder builder = Polynomial.getPolynomialBuilder();
+        final Polynomial.DoubleBuilder builder =
+                Polynomial.getPolynomialDoubleBuilder();
         
         int coefficientIndex = 0;
         
