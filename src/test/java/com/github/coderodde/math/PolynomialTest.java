@@ -139,13 +139,11 @@ public final class PolynomialTest {
     @Test(expected = IllegalArgumentException.class)
     public void throwDoubleBuilderOnNanCoefficient() {
         Polynomial.getPolynomialDoubleBuilder().add(3, Double.NaN);
-        System.out.println("a");
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void throwDoubleBuilderOnInfiniteCoefficient() {
         Polynomial.getPolynomialDoubleBuilder()
                   .add(4, Double.NEGATIVE_INFINITY);
-        System.out.println("b");
     }
 }

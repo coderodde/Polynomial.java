@@ -18,6 +18,7 @@ public final class PolynomialDemo {
     private static Polynomial previousPolynomial = null;
     
     public static void main(final String[] args) {
+        System.out.println("\u2076");
         final Scanner scanner = new Scanner(System.in);
         
         while (true) {

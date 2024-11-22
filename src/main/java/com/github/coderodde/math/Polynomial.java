@@ -7,27 +7,28 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * This class implements a polynomial.
+ * This class implements a polynomial represented in coefficient form.
  * 
  * @version 2.0.0 (Nov 22, 2024)
  * @since 1.0.0 (Nov 21, 2024)
  */
 public final class Polynomial {
     
+    /**
+     * Maps each digit character to its superscript counterpart.
+     */
     private static final Map<Character, Character>
             MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT = new HashMap<>(10);
     
     static {
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('0', '⁰');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('1', '¹');
         MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('2', '²');
         MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('3', '³');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('4', '⁴');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('5', '⁵');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('6', '⁶');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('7', '⁷');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('8', '⁸');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('9', '⁹');   
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('4', '\u2074');
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('5', '\u2075');
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('6', '\u2076');
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('7', '\u2077');
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('8', '\u2078');
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('9', '\u2079');   
     }
     
     /**
@@ -54,7 +55,7 @@ public final class Polynomial {
     }
     
     /**
-     * Evaluates this polynomial at the point {@code x}.
+     * Evaluates this polynomial at the point {@code x} using Horner's rule.
      * 
      * @param x the argument value for this polynomial.
      * 
@@ -189,6 +190,11 @@ public final class Polynomial {
                              othr.coefficients);
     }
 
+    /**
+     * Sets the scale of each coefficient.
+     * 
+     * @param scale the next scale to use.
+     */
     public void setScale(final int scale) {
         for (int i = 0; i < coefficients.length; i++) {
             coefficients[i] = coefficients[i].setScale(scale);
@@ -270,20 +276,48 @@ public final class Polynomial {
         return sb.toString();
     }
     
+    /**
+     * Creates a new builder and returns it.
+     * 
+     * @return a new polynomial builder.
+     */
     public static Builder getPolynomialBuilder() {
         return new Builder();
     }
     
+    /**
+     * Creates a new double builder and returns it.
+     * 
+     * @return a new polynomial double builder. 
+     */
     public static DoubleBuilder getPolynomialDoubleBuilder() {
         return new DoubleBuilder();
     }
     
+    /**
+     * The class for building sparse polynomials.
+     */
     public static final class Builder {
+        
+        /**
+         * Maps the coefficient index to its coefficient value.
+         */
         private final Map<Integer, BigDecimal> 
                 mapCoefficientIndexToCoefficient = new HashMap<>();
         
+        /**
+         * The maximum coefficient index so far.
+         */
         private int maximumCoefficientIndex = 0;
         
+        /**
+         * Adds a new coefficient to this builder.
+         * 
+         * @param coefficientIndex the index of the coefficient.
+         * @param coefficient      the value of the coefficient.
+         * 
+         * @return this builder.
+         */
         public Builder add(final int coefficientIndex,
                            final BigDecimal coefficient) {
             
@@ -297,9 +331,19 @@ public final class Polynomial {
             return this;
         }
         
+        /**
+         * Builds and returns the polynomial from this builder.
+         * 
+         * @return a polynomial.
+         */
         public Polynomial build() {
             final BigDecimal[] coefficients =
                     new BigDecimal[maximumCoefficientIndex + 1];
+            
+            if (mapCoefficientIndexToCoefficient.isEmpty()) {
+                // Special case: return null polynomial y = 0:
+                return new Polynomial();
+            }
             
             for (final Map.Entry<Integer, BigDecimal> e :
                     mapCoefficientIndexToCoefficient.entrySet()) {
@@ -311,13 +355,29 @@ public final class Polynomial {
         }
     }
     
+    /**
+     * The class for building sparse polynomials from double coefficients.
+     */
     public static final class DoubleBuilder {
         
+        /**
+         * Maps the coefficient index to its coefficient value.
+         */
         private final Map<Integer, Double> 
                 mapCoefficientIndexToCoefficient = new HashMap<>();
         
+        /**
+         * The maximum coefficient index so far.
+         */
         private int maximumCoefficientIndex = 0;
         
+        /**
+         * Builds and returns a polynomial using the input coefficients.
+         * 
+         * @param coefficients the {@code double} array of coefficients.
+         * 
+         * @return a polynomial.
+         */
         public Polynomial buildFrom(final double... coefficients) {
             if (coefficients.length == 0) {
                 return new Polynomial();
@@ -332,6 +392,14 @@ public final class Polynomial {
             return builder.build();
         }
         
+        /**
+         * Adds a new coefficient to this builder.
+         * 
+         * @param coefficientIndex the index of the coefficient.
+         * @param coefficient      the value of the coefficient.
+         * 
+         * @return this builder.
+         */
         public DoubleBuilder add(final int coefficientIndex,
                                  final double coefficient) {
             
@@ -348,9 +416,18 @@ public final class Polynomial {
             return this;
         }
         
+        /**
+         * Builds and returns the polynomial from this builder.
+         * 
+         * @return a polynomial.
+         */
         public Polynomial build() {
             final BigDecimal[] coefficients =
                     new BigDecimal[maximumCoefficientIndex + 1];
+            
+            if (mapCoefficientIndexToCoefficient.isEmpty()) {
+                return new Polynomial();
+            }
             
             for (final Map.Entry<Integer, Double> e :
                     mapCoefficientIndexToCoefficient.entrySet()) {
@@ -361,17 +438,27 @@ public final class Polynomial {
             return new Polynomial(coefficients);
         }
         
+        /**
+         * Validates the coefficient.
+         * 
+         * @param coefficientIndex the index of the coefficient to validate.    
+         * @param coefficientValue the value of the coefficient to validate.
+         */
         private static void validateCoefficient(final int coefficientIndex,
-                                                final double coefficient) {
-            if (Double.isNaN(coefficient)) {
+                                                final double coefficientValue) {
+            if (Double.isNaN(coefficientValue)) {
                 reportNanException(coefficientIndex);
             }
             
-            if (Double.isInfinite(coefficient)) {
-                reportInfiniteException(coefficientIndex, coefficient);
+            if (Double.isInfinite(coefficientValue)) {
+                reportInfiniteException(coefficientIndex, coefficientValue);
             }
         }
         
+        /**
+         * Builds and throws an exception reporting NaN coefficients.
+         * @param coefficientIndex 
+         */
         private static void reportNanException(final int coefficientIndex) {
             final String exceptionString = 
                     String.format(
@@ -381,6 +468,12 @@ public final class Polynomial {
             throw new IllegalArgumentException(exceptionString);
         }
         
+        /**
+         * Builds and throws an exception reporting infinite coefficients.
+         * 
+         * @param coefficientIndex the index of the coefficient.
+         * @param coefficient      the value of the coefficient (infinite).
+         */
         private static void reportInfiniteException(final int coefficientIndex,
                                                     final double coefficient) {
             final String exceptionString = 
