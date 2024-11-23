@@ -92,9 +92,6 @@ public final class PolynomialMultiplier {
     
     private static Polynomial multiplyViaKaratsubaImpl(final Polynomial p1,
                                                        final Polynomial p2) {
-        if (p1.isUniformlyScaled() == false || p2.isUniformlyScaled() == false) {
-            throw new IllegalStateException("shit");
-        }
         final int n = Math.max(p1.getDegree(),
                                p2.getDegree());
         

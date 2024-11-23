@@ -10,7 +10,7 @@ import java.util.Objects;
 /**
  * This class implements a polynomial represented in coefficient form.
  * 
- * @version 2.0.0 (Nov 22, 2024)
+ * @version 2.1.0 (Nov 23, 2024)
  * @since 1.0.0 (Nov 21, 2024)
  */
 public final class Polynomial {
@@ -106,7 +106,7 @@ public final class Polynomial {
      * @return the number of coefficients.
      */
     public int length() {
-        return coefficients.length;
+        return degree + 1;
     }
     
     /**
@@ -207,12 +207,11 @@ public final class Polynomial {
         return degree;
     }
     
-    @Override
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
         }
-        
+    
         if (o == null) {
             return false;
         }
@@ -221,10 +220,47 @@ public final class Polynomial {
             return false;
         }
         
-        final Polynomial othr = (Polynomial) o;
+        final Polynomial other = (Polynomial) o;
         
-        return Arrays.equals(this.coefficients, 
-                             othr.coefficients);
+        if (getDegree() != other.getDegree()) {
+            return false;
+        }
+        
+        for (int i = 0; i < length(); i++) {
+            if (!getCoefficient(i).equals(other.getCoefficient(i))) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    public boolean approximateEquals(final Polynomial other,
+                                     final BigDecimal epsilon) {
+        if (other == this) {
+            return true;
+        }
+        
+        if (other == null) {
+            return false;
+        }
+        
+        if (getDegree() != other.getDegree()) {
+            return false;
+        }
+        
+        for (int i = 0; i < length(); i++) {
+            final BigDecimal coefficient1 = getCoefficient(i);
+            final BigDecimal coefficient2 = other.getCoefficient(i);
+            
+            if (!approximatelyEquals(coefficient1,
+                                     coefficient2, 
+                                     epsilon)) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     /**
@@ -481,6 +517,14 @@ public final class Polynomial {
         }
         
         return sb.toString();
+    }
+    
+    private static boolean approximatelyEquals(final BigDecimal bd1,
+                                               final BigDecimal bd2,
+                                               final BigDecimal epsilon) {
+        BigDecimal diff = bd1.subtract(bd2);
+        diff = diff.abs();
+        return diff.compareTo(epsilon) < 0;
     }
     
     /**

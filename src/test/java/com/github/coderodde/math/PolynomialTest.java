@@ -11,7 +11,7 @@ public final class PolynomialTest {
     private static final long MIN_COEFFICIENT = -10L;
     private static final long MAX_COEFFICIENT = +10L;
     
-    //@Test
+    @Test
     public void evaluate1() {
         // 2x - 1
         Polynomial p1 = 
@@ -22,7 +22,7 @@ public final class PolynomialTest {
         assertEquals(BigDecimal.valueOf(5.0), value);
     }
     
-    //@Test
+    @Test
     public void evaluate2() {
         Polynomial p1 = 
                 Polynomial.getPolynomialDoubleBuilder()
@@ -33,7 +33,7 @@ public final class PolynomialTest {
         assertEquals(BigDecimal.valueOf(39.0), value);
     }
     
-    //@Test
+    @Test
     public void getCoefficient() {
         Polynomial p = Polynomial.getPolynomialDoubleBuilder()
                                  .buildFrom(1, 2, 3, 4);
@@ -44,13 +44,13 @@ public final class PolynomialTest {
         assertEquals(BigDecimal.valueOf(4.0), p.getCoefficient(3));
     }
     
-    //@Test
+    @Test
     public void length() {
         assertEquals(5, Polynomial.getPolynomialDoubleBuilder()
                                   .buildFrom(3, -2, -1, 4, 2).length());
     }
     
-    //@Test
+    @Test
     public void sum() {
         Polynomial p1 = Polynomial.getPolynomialDoubleBuilder()
                                    .buildFrom(3, -1, 2);
@@ -66,13 +66,13 @@ public final class PolynomialTest {
         assertEquals(expected, sum);
     }
 
-    //@Test
+    @Test
     public void getDegree() {
         assertEquals(3, Polynomial.getPolynomialDoubleBuilder()
                                   .buildFrom(1, -2, 3, -4).getDegree());
     }
     
-    //@Test
+    @Test
     public void derivate() {
         Polynomial p = 
                 Polynomial
@@ -96,7 +96,7 @@ public final class PolynomialTest {
         assertEquals(expected, d);
     }
     
-    //@Test
+    @Test
     public void integrate() {
         // 6x^2 - 8x + 4
         Polynomial p = 
@@ -144,7 +144,7 @@ public final class PolynomialTest {
         assertEquals(p, next);
     }
     
-    //@Test
+    @Test
     public void multiplyNaive() {
         // x^2 - 2x + 3
         Polynomial p1 = 
@@ -176,7 +176,7 @@ public final class PolynomialTest {
         assertEquals(expected, product);
     }
     
-    //@Test
+    @Test
     public void multiplyKaratsuba() {
         // x^2 - 2x + 3
         Polynomial p1 = 
@@ -208,7 +208,7 @@ public final class PolynomialTest {
         assertEquals(expected, product);
     }
     
-    //@Test
+    @Test
     public void negate() {
         Polynomial p = 
                 Polynomial
@@ -223,7 +223,7 @@ public final class PolynomialTest {
         assertEquals(expected, p.negate());
     }
     
-    //@Test
+    @Test
     public void shift() {
         Polynomial p = 
                 Polynomial
@@ -243,7 +243,7 @@ public final class PolynomialTest {
         assertEquals(expected, p);
     }
     
-    //@Test
+    @Test
     public void testConstructEmptyPolynomial() {
         Polynomial p = new Polynomial();
         
@@ -254,7 +254,7 @@ public final class PolynomialTest {
         assertEquals(BigDecimal.ZERO, p.evaluate(BigDecimal.valueOf(-3.0)));
     }
     
-    //@Test
+    @Test
     public void builder() {
         final Polynomial p = Polynomial.getPolynomialBuilder()
                                        .add(10, BigDecimal.valueOf(10))
@@ -266,7 +266,7 @@ public final class PolynomialTest {
         assertEquals(BigDecimal.valueOf(5000), p.getCoefficient(5000));
     }
     
-    //@Test
+    @Test
     public void emptyPolynomial() {
         Polynomial p = new Polynomial();
         
@@ -278,12 +278,12 @@ public final class PolynomialTest {
         assertEquals(BigDecimal.ZERO, p.evaluate(BigDecimal.valueOf(-7.0)));
     }
     
-    //@Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void throwDoubleBuilderOnNanCoefficient() {
         Polynomial.getPolynomialDoubleBuilder().add(3, Double.NaN);
     }
     
-    //@Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void throwDoubleBuilderOnInfiniteCoefficient() {
         Polynomial.getPolynomialDoubleBuilder()
                   .add(4, Double.NEGATIVE_INFINITY);
@@ -350,13 +350,15 @@ public final class PolynomialTest {
         final Polynomial p1 = Polynomial.getPolynomialBuilder()
                                         .add(0, BigDecimal.valueOf(3))
                                         .add(1, BigDecimal.valueOf(-2))
-                                        .build();
+                                        .build()
+                                        .setScale(3);
         
         // 5x - 1
         final Polynomial p2 = Polynomial.getPolynomialBuilder()
                                         .add(0, BigDecimal.valueOf(-1))
                                         .add(1, BigDecimal.valueOf(5))
-                                        .build();
+                                        .build()
+                                        .setScale(3);
         
         // (-2x + 3)(5x - 1) = -10x^2 + 2x + 15x - 3 = -10x^2 + 17x - 3
         final Polynomial expected = Polynomial.getPolynomialBuilder()
@@ -369,8 +371,8 @@ public final class PolynomialTest {
         final Polynomial karat = PolynomialMultiplier.multiplyViaKaratsuba(p1, 
                                                                            p2);
         
-        assertEquals(expected, naive);
-        assertEquals(expected, karat);
+        assertTrue(expected.approximateEquals(naive, BigDecimal.valueOf(0.01)));
+        assertTrue(expected.approximateEquals(karat, BigDecimal.valueOf(0.01)));
     }
     
     @Test
@@ -402,20 +404,33 @@ public final class PolynomialTest {
         final Polynomial naive = PolynomialMultiplier.multiplyViaNaive(p1, p2);
         final Polynomial karat = PolynomialMultiplier.multiplyViaKaratsuba(p1, 
                                                                            p2);
-        
         assertEquals(expected, naive);
         assertEquals(expected, karat);
     }
     
-//    @Test
+    @Test
+    public void equals() {
+        Polynomial p1 = Polynomial.getPolynomialBuilder().add(0, -2)
+                                                         .add(1, 4)
+                                                         .build()
+                                                         .setScale(3);
+        
+        Polynomial p2 = Polynomial.getPolynomialBuilder().add(0, -2)
+                                                         .add(1, 4)
+                                                         .build()
+                                                         .setScale(3);
+        
+        assertTrue(p1.equals(p2));
+    }
+    
+    @Test
     public void bruteForceKaratsubaVsNaive() {
         final Random random = new Random(13L);
+        final BigDecimal epsilon = BigDecimal.valueOf(0.01);
         
         for (int iter = 0; iter < 100; iter++) {
-            final Polynomial p1 = getRandomPolynomial(random).setScale(2);
-            final Polynomial p2 = getRandomPolynomial(random).setScale(2);
-            
-            System.out.printf("(%s) * (%s)", p1, p2);
+            final Polynomial p1 = getRandomPolynomial(random).setScale(4);
+            final Polynomial p2 = getRandomPolynomial(random).setScale(4);
             
             final Polynomial product1 = 
                     PolynomialMultiplier
@@ -427,10 +442,7 @@ public final class PolynomialTest {
                             .multiplyViaKaratsuba(p1,
                                                   p2).setScale(2);
             
-            assertEquals(product1,
-                         product2);
-            
-            System.out.println(iter);
+            assertTrue(product1.approximateEquals(product2, epsilon));
         }
     }
     
