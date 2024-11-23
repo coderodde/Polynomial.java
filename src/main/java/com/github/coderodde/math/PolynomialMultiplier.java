@@ -154,9 +154,19 @@ public final class PolynomialMultiplier {
                                              final Polynomial r3,
                                              final int i) {
         
-        return r3.getCoefficient(i)
-                 .add(r1.getCoefficient(i).negate())
-                 .add(r2.getCoefficient(i).negate());
+        final BigDecimal term1 = i < 0 || i >= r1.length() ?
+                BigDecimal.ZERO :
+                r1.getCoefficient(i);
+        
+        final BigDecimal term2 = i < 0 || i >= r2.length() ?
+                BigDecimal.ZERO : 
+                r2.getCoefficient(i);
+        
+        final BigDecimal term3 = i < 0 || i >= r3.length() ? 
+                BigDecimal.ZERO : 
+                r3.getCoefficient(i);
+        
+        return term3.add(term1.negate()).add(term3.negate());
     }
     
     private static BigDecimal getCoefficient(final Polynomial r1, 
