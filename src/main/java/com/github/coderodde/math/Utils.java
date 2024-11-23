@@ -11,13 +11,13 @@ import java.util.Random;
  */
 public final class Utils {
     
-    private static final int MAX_POLINOMIAL_LENGTH = 10;
+    private static final int POLINOMIAL_LENGTH = 10;
     private static final long MIN_COEFFICIENT = -10L;
     private static final long MAX_COEFFICIENT = +10L;
     
     public static Polynomial getRandomPolynomial(final Random random) {
         return getRandomPolynomial(random, 
-                                   MAX_POLINOMIAL_LENGTH);
+                                   POLINOMIAL_LENGTH);
     }
     
     private static BigDecimal getRandomCoefficient(final Random random) {
@@ -28,9 +28,8 @@ public final class Utils {
     
     public static Polynomial 
         getRandomPolynomial(final Random random,
-                            final int maxPolynomialLength) {
+                            final int polynomialLength) {
             
-        final int polynomialLength = 1 + random.nextInt(maxPolynomialLength);
         final Polynomial.Builder builder = Polynomial.getPolynomialBuilder();
         
         for (int i = 0; i < polynomialLength; i++) {

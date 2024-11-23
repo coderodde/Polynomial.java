@@ -2,8 +2,11 @@ package com.github.coderodde.math.demos;
 
 import com.github.coderodde.math.Polynomial;
 import com.github.coderodde.math.PolynomialMultiplier;
+import com.github.coderodde.math.Utils;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -14,10 +17,15 @@ import java.util.Scanner;
  */
 public final class PolynomialDemo {
     
+    private static final int POLYNOMIAL_LENGTH = 10000;
+    
     private static final Map<String, Polynomial> environment = new HashMap<>();
     private static Polynomial previousPolynomial = null;
     
     public static void main(final String[] args) {
+        warmup();
+        benchmark();
+        
         System.out.println("\u2076");
         final Scanner scanner = new Scanner(System.in);
         
@@ -136,5 +144,45 @@ public final class PolynomialDemo {
         previousPolynomial = p;
         System.out.printf(">>> %s\n", p);
         return p;
+    }
+    
+    private static void benchmark() {
+        final Random random = new Random(13L);
+        final Polynomial p1 = Utils.getRandomPolynomial(random, 
+                                                        POLYNOMIAL_LENGTH);
+        
+        final Polynomial p2 = Utils.getRandomPolynomial(random, 
+                                                        POLYNOMIAL_LENGTH);
+        
+        long start = System.currentTimeMillis();
+        
+        Polynomial r1 = PolynomialMultiplier.multiplyViaNaive(p1, p2);
+        
+        long end = System.currentTimeMillis();
+        
+        System.out.printf("Naïve: %d milliseconds.\n", end - start);
+        
+        start = System.currentTimeMillis();
+        
+        Polynomial r2 = PolynomialMultiplier.multiplyViaKaratsuba(p1, p2);
+        
+        end = System.currentTimeMillis();
+        
+        System.out.printf("Karatsuba: %d milliseconds.\n", end - start);
+        
+        System.out.printf("Agree: %b.\n", 
+                          r1.approximateEquals(r2, BigDecimal.valueOf(0.1)));
+    }
+    
+    private static void warmup() {
+        final Random random = new Random(13L);
+        final Polynomial p1 = Utils.getRandomPolynomial(random, 
+                                                        POLYNOMIAL_LENGTH);
+        
+        final Polynomial p2 = Utils.getRandomPolynomial(random, 
+                                                        POLYNOMIAL_LENGTH);
+        
+        PolynomialMultiplier.multiplyViaNaive(p1, p2);
+        PolynomialMultiplier.multiplyViaKaratsuba(p1, p2);
     }
 }
