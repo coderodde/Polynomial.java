@@ -1,15 +1,12 @@
 package com.github.coderodde.math;
 
+import static com.github.coderodde.math.Utils.getRandomPolynomial;
 import java.math.BigDecimal;
 import java.util.Random;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 public final class PolynomialTest {
-    
-    private static final int MAX_POLINOMIAL_LENGTH = 10;
-    private static final long MIN_COEFFICIENT = -10L;
-    private static final long MAX_COEFFICIENT = +10L;
     
     @Test
     public void evaluate1() {
@@ -444,26 +441,5 @@ public final class PolynomialTest {
             
             assertTrue(product1.approximateEquals(product2, epsilon));
         }
-    }
-    
-    private static Polynomial getRandomPolynomial(final Random random) {
-        final int polynomialLength = 1 + random.nextInt(MAX_POLINOMIAL_LENGTH);
-        final Polynomial.Builder builder = Polynomial.getPolynomialBuilder();
-        
-        for (int i = 0; i < polynomialLength; i++) {
-            builder.add(i, getRandomCoefficient(random));
-        }
-        
-        return builder.build();
-    }
-    
-    private static BigDecimal getRandomCoefficient(final Random random) {
-        final long longCoefficient = MIN_COEFFICIENT 
-                                   + random.nextLong(
-                                           MAX_COEFFICIENT 
-                                         - MIN_COEFFICIENT
-                                         + 1);
-        
-        return BigDecimal.valueOf(longCoefficient);
     }
 }
