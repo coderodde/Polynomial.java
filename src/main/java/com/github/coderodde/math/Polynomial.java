@@ -38,6 +38,8 @@ public final class Polynomial {
      * appears at {@code coefficients[0]}.
      */
     final BigDecimal[] coefficients;
+    
+    private final int degree;
      
     /**
      * Constructs a polynomial with given coefficients. The coefficients of the 
@@ -50,8 +52,10 @@ public final class Polynomial {
         if (coefficients.length == 0) {
             // Special case: the null polynomial y = 0:
             this.coefficients = new BigDecimal[]{ BigDecimal.ZERO };
+            this.degree = 0;
         } else {
             this.coefficients = coefficients;
+            this.degree = computeDegree();
         }
     }
     
@@ -163,12 +167,44 @@ public final class Polynomial {
     }
     
     /**
+     * Returns the scale of this polynomial. This is essentially the scale of 
+     * each coefficient {@link BigDecimal} in the coefficient array.
+     * 
+     * @return the scale of this polynomial.
+     */
+    public int scale() {
+        return coefficients[0].scale();
+    }
+    
+    /**
+     * Checks that all coefficients have the same scale.
+     * 
+     * @return {@code true} iff all the coefficients in this polynomial are 
+     *         same.
+     */
+    public boolean isUniformlyScaled() {
+        final int scale = scale();
+        
+        for (int i = 1; i < coefficients.length; i++) {
+            final BigDecimal coefficient = coefficients[i];
+            
+            if (coefficient != BigDecimal.ZERO 
+                    && scale != coefficient.scale()) {
+                
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
      * Returns the degree of this polynomial.
      * 
      * @return the degree of this polynomial.
      */
     public int getDegree() {
-        return coefficients.length - 1;
+        return degree;
     }
     
     @Override
@@ -411,6 +447,21 @@ public final class Polynomial {
         return new Polynomial(nextCoefficients);
     }
     
+    private int computeDegree() {
+        for (int i = coefficients.length - 1; i >= 0; i--) {
+            final BigDecimal coefficient = coefficients[i];
+            final int coefficientScale = coefficient.scale();
+            final BigDecimal MY_ZERO = 
+                    BigDecimal.ZERO.setScale(coefficientScale);
+            
+            if (!coefficient.equals(MY_ZERO)) {
+                return i;
+            }
+        }
+        
+        return 0;
+    }
+    
     /**
      * Converts the input power to a superscript string.
      * 
@@ -500,6 +551,12 @@ public final class Polynomial {
                 // Special case: return null polynomial y = 0:
                 return new Polynomial();
             }
+            
+            Arrays.fill(
+                    coefficients,
+                    0,
+                    coefficients.length, 
+                    BigDecimal.ZERO);
             
             for (final Map.Entry<Integer, BigDecimal> e :
                     mapCoefficientIndexToCoefficient.entrySet()) {

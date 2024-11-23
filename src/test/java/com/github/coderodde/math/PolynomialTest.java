@@ -290,6 +290,61 @@ public final class PolynomialTest {
     }
     
     @Test
+    public void getDegree2() {
+        Polynomial p = 
+                Polynomial.getPolynomialBuilder()
+                          .add(0, BigDecimal.ZERO)
+                          .add(0, BigDecimal.ZERO)
+                          .add(0, BigDecimal.ZERO)
+                          .build();
+        
+        assertEquals(0, p.getDegree());
+        
+        p = Polynomial.getPolynomialBuilder()
+                      .add(0, BigDecimal.ZERO)
+                      .add(0, BigDecimal.ZERO)
+                      .build();
+        
+        assertEquals(0, p.getDegree());
+        
+        p = Polynomial.getPolynomialBuilder()
+                      .add(0, BigDecimal.ZERO)
+                      .build();
+        
+        assertEquals(0, p.getDegree());
+        
+        p = Polynomial.getPolynomialBuilder()
+                      .build();
+        
+        assertEquals(0, p.getDegree());
+        
+        p = Polynomial.getPolynomialBuilder()
+                      .add(1, BigDecimal.ONE)
+                      .add(2, BigDecimal.ZERO.setScale(4))
+                      .build();
+        
+        assertEquals(1, p.getDegree());
+        
+        p = Polynomial.getPolynomialBuilder()
+                      .add(1, BigDecimal.ONE)
+                      .add(2, BigDecimal.ZERO.setScale(4))
+                      .add(4, BigDecimal.ZERO.setScale(1))
+                      .build();
+        
+        assertEquals(1, p.getDegree());
+        
+        p = Polynomial.getPolynomialBuilder()
+                      .add(1, BigDecimal.ONE)
+                      .add(2, BigDecimal.ZERO.setScale(4))
+                      .add(4, BigDecimal.ZERO.setScale(1))
+                      .add(5, BigDecimal.valueOf(4.0).setScale(10))
+                      .add(7, BigDecimal.ZERO)
+                      .build();
+        
+        assertEquals(5, p.getDegree());
+    }
+    
+    @Test
     public void bruteForceKaratsubaVsNaive() {
         final Random random = new Random(13L);
         

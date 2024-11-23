@@ -92,9 +92,11 @@ public final class PolynomialMultiplier {
     
     private static Polynomial multiplyViaKaratsubaImpl(final Polynomial p1,
                                                        final Polynomial p2) {
-            
-        final int n = Math.max(p1.length(),
-                               p2.length());
+        if (p1.isUniformlyScaled() == false || p2.isUniformlyScaled() == false) {
+            throw new IllegalStateException("shit");
+        }
+        final int n = Math.max(p1.getDegree(),
+                               p2.getDegree());
         
         if (n == 0 || n == 1) {
             return multiplyViaNaive(p1, p2);
@@ -102,8 +104,8 @@ public final class PolynomialMultiplier {
         
         final int m = (int) Math.ceil(n / 2.0);
         
-        final BigDecimal[] pPrime = new BigDecimal[m];
-        final BigDecimal[] qPrime = new BigDecimal[m];
+        final BigDecimal[] pPrime = new BigDecimal[m + 1];
+        final BigDecimal[] qPrime = new BigDecimal[m + 1];
         
         for (int i = 0; i < m; i++) {
             pPrime[i] = p1.getCoefficient(i).add(p1.getCoefficient(m + i));
@@ -111,8 +113,8 @@ public final class PolynomialMultiplier {
         }
         
         if (n > 2 * m - 1) {
-            pPrime[m] = p1.getCoefficient(n);
-            qPrime[m] = p2.getCoefficient(n);
+            pPrime[m] = p1.getCoefficient(p1.getDegree());
+            qPrime[m] = p2.getCoefficient(p2.getDegree());
         } else {
             pPrime[m] = BigDecimal.ZERO;
             qPrime[m] = BigDecimal.ZERO;
@@ -180,16 +182,6 @@ public final class PolynomialMultiplier {
         return term1.add(term2).add(term3);
     }
     
-    private static Polynomial getR3Polynomial(final BigDecimal[] pCoefficients,
-                                              final BigDecimal[] qCoefficients) 
-    {
-        final Polynomial pResultPolynomial = new Polynomial(pCoefficients);
-        final Polynomial qResultPolynomial = new Polynomial(qCoefficients);
-        
-        return multiplyViaKaratsubaImpl(pResultPolynomial,
-                                        qResultPolynomial);
-    }
-    
     private static Polynomial getR1Polynomial(final Polynomial p,
                                               final Polynomial q,
                                               final int m) {
@@ -225,76 +217,13 @@ public final class PolynomialMultiplier {
                                         qResultPolynomial);
     }
     
-    private static Polynomial stitchImpl(Polynomial r1,
-                                         Polynomial r4,
-                                         Polynomial t,
-                                         final int m) {
-        t  = t.shift(m);
-        r4 = r4.shift(2 * m);
+    private static Polynomial getR3Polynomial(final BigDecimal[] pCoefficients,
+                                              final BigDecimal[] qCoefficients) 
+    {
+        final Polynomial pResultPolynomial = new Polynomial(pCoefficients);
+        final Polynomial qResultPolynomial = new Polynomial(qCoefficients);
         
-        return r1.sum(t).sum(r4);
-    }
-    
-    private static final class KaratsubaPolynomials {
-        Polynomial p1;
-        Polynomial p2;
-        Polynomial q1;
-        Polynomial q2;
-    }
-    
-    private static KaratsubaPolynomials 
-        getKaratsubaPolynomials(
-                final Polynomial p,
-                final Polynomial q) {
-     
-        final KaratsubaPolynomials karatsubaPolynomials = 
-                new KaratsubaPolynomials();
-        
-        loadP(karatsubaPolynomials, p);
-        loadQ(karatsubaPolynomials, q);
-        
-        return karatsubaPolynomials;
-    }
-        
-    private static void loadP(final KaratsubaPolynomials karatsubaPolynomials,
-                              final Polynomial p) {
-        
-        final int n = p.length();
-        final int m = n / 2;
-        
-        final BigDecimal[] p1Coefficients = new BigDecimal[m];
-        final BigDecimal[] p2Coefficients = new BigDecimal[n - m];
-        
-        for (int i = 0; i < m; i++) {
-            p1Coefficients[i] = p.getCoefficient(i);
-        }
-        
-        for (int i = 0; i < n - m; i++) {
-            p2Coefficients[i] = p.getCoefficient(i + m);
-        }
-        
-        karatsubaPolynomials.p1 = new Polynomial(p1Coefficients);
-        karatsubaPolynomials.p2 = new Polynomial(p2Coefficients);
-    }
-        
-    private static void loadQ(final KaratsubaPolynomials karatsubaPolynomials,
-                              final Polynomial q) {
-        
-        final int n = q.length();
-        final int m = n / 2;
-        
-        final BigDecimal[] q1Coefficients = new BigDecimal[m];
-        final BigDecimal[] q2Coefficients = new BigDecimal[n - m];
-        
-        for (int i = 0; i < m; i++) {
-            q1Coefficients[i] = q.getCoefficient(i);
-        }
-        
-        for (int i = 0; i < n - m; i++) {
-            q2Coefficients[i] = q.getCoefficient(i + m);
-        }
-        
-        karatsubaPolynomials.q1 = new Polynomial(q1Coefficients);
-        karatsubaPolynomials.q2 = new Polynomial(q2Coefficients);
+        return multiplyViaKaratsubaImpl(pResultPolynomial,
+                                        qResultPolynomial);
     }
 }
