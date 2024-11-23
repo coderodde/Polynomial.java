@@ -345,6 +345,69 @@ public final class PolynomialTest {
     }
     
     @Test
+    public void karatsuba() {
+        // -2x + 3
+        final Polynomial p1 = Polynomial.getPolynomialBuilder()
+                                        .add(0, BigDecimal.valueOf(3))
+                                        .add(1, BigDecimal.valueOf(-2))
+                                        .build();
+        
+        // 5x - 1
+        final Polynomial p2 = Polynomial.getPolynomialBuilder()
+                                        .add(0, BigDecimal.valueOf(-1))
+                                        .add(1, BigDecimal.valueOf(5))
+                                        .build();
+        
+        // (-2x + 3)(5x - 1) = -10x^2 + 2x + 15x - 3 = -10x^2 + 17x - 3
+        final Polynomial expected = Polynomial.getPolynomialBuilder()
+                                              .add(0, BigDecimal.valueOf(-3))
+                                              .add(1, BigDecimal.valueOf(17))
+                                              .add(2, BigDecimal.valueOf(-10))
+                                              .build();
+        
+        final Polynomial naive = PolynomialMultiplier.multiplyViaNaive(p1, p2);
+        final Polynomial karat = PolynomialMultiplier.multiplyViaKaratsuba(p1, 
+                                                                           p2);
+        
+        assertEquals(expected, naive);
+        assertEquals(expected, karat);
+    }
+    
+    @Test
+    public void karatsuba2() {
+        
+        // -2x^2 + 3x + 4 
+        final Polynomial p1 = Polynomial.getPolynomialBuilder()
+                                        .add(0, BigDecimal.valueOf(4))
+                                        .add(1, BigDecimal.valueOf(3))
+                                        .add(2, BigDecimal.valueOf(-2))
+                                        .build();
+        
+        // 5x - 1
+        final Polynomial p2 = Polynomial.getPolynomialBuilder()
+                                        .add(0, BigDecimal.valueOf(-1))
+                                        .add(1, BigDecimal.valueOf(5))
+                                        .build();
+        
+        // (-2x^2 + 3x + 4)(5x - 1) = 
+        // (-10x^3 + 15x^2 + 20x) - (-2x^2 + 3x + 4) =
+        // -10x^3 + 17x^2 + 17x - 4
+        final Polynomial expected = Polynomial.getPolynomialBuilder()
+                                              .add(0, BigDecimal.valueOf(-4))
+                                              .add(1, BigDecimal.valueOf(17))
+                                              .add(2, BigDecimal.valueOf(17))
+                                              .add(3, BigDecimal.valueOf(-10))
+                                              .build();
+        
+        final Polynomial naive = PolynomialMultiplier.multiplyViaNaive(p1, p2);
+        final Polynomial karat = PolynomialMultiplier.multiplyViaKaratsuba(p1, 
+                                                                           p2);
+        
+        assertEquals(expected, naive);
+        assertEquals(expected, karat);
+    }
+    
+//    @Test
     public void bruteForceKaratsubaVsNaive() {
         final Random random = new Random(13L);
         

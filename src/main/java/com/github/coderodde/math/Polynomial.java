@@ -539,6 +539,36 @@ public final class Polynomial {
         }
         
         /**
+         * Adds a new coefficient to this builder.
+         * 
+         * @param coefficientIndex the index of the coefficient.
+         * @param coefficient      the value of the coefficient.
+         * 
+         * @return this builder.
+         */
+        public Builder add(final int coefficientIndex,
+                           final double coefficient) {
+            
+            return add(coefficientIndex, 
+                       BigDecimal.valueOf(coefficient));
+        }
+        
+        /**
+         * Adds a new coefficient to this builder.
+         * 
+         * @param coefficientIndex the index of the coefficient.
+         * @param coefficient      the value of the coefficient.
+         * 
+         * @return this builder.
+         */
+        public Builder add(final int coefficientIndex,
+                           final long coefficient) {
+            
+            return add(coefficientIndex, 
+                       BigDecimal.valueOf(coefficient));
+        }
+        
+        /**
          * Builds and returns the polynomial from this builder.
          * 
          * @return a polynomial.

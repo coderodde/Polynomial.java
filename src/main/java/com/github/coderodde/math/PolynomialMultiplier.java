@@ -113,8 +113,8 @@ public final class PolynomialMultiplier {
         }
         
         if (n > 2 * m - 1) {
-            pPrime[m] = p1.getCoefficient(p1.getDegree());
-            qPrime[m] = p2.getCoefficient(p2.getDegree());
+            pPrime[m] = p1.getCoefficient(n);
+            qPrime[m] = p2.getCoefficient(n);
         } else {
             pPrime[m] = BigDecimal.ZERO;
             qPrime[m] = BigDecimal.ZERO;
@@ -166,7 +166,7 @@ public final class PolynomialMultiplier {
                 BigDecimal.ZERO : 
                 r3.getCoefficient(i);
         
-        return term3.add(term1.negate()).add(term3.negate());
+        return term3.add(term1.negate()).add(term2.negate());
     }
     
     private static BigDecimal getCoefficient(final Polynomial r1, 
