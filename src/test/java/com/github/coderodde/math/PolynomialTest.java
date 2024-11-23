@@ -130,6 +130,20 @@ public final class PolynomialTest {
         assertEquals(expected, i);
     }
     
+    @Test
+    public void integrateDerivateTwice() {
+        Polynomial p =
+                Polynomial.getPolynomialDoubleBuilder().buildFrom(1, -2, 3)
+                          .setScale(3);
+        
+        Polynomial next = p.integrate()
+                           .setScale(3)
+                           .derivate()
+                           .setScale(3);
+        
+        assertEquals(p, next);
+    }
+    
     //@Test
     public void multiplyNaive() {
         // x^2 - 2x + 3
