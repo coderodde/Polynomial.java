@@ -12,7 +12,7 @@ import java.util.Scanner;
 /**
  * This is demonstration program for the {@link Polynomial} class.
  * 
- * @version 1.0.1 (Nov 22, 2024)
+ * @version 1.2.0 (Nov 23, 2024)
  * @since 1.0.0 (Nov 21, 2024)
  */
 public final class PolynomialDemo {
@@ -115,8 +115,8 @@ public final class PolynomialDemo {
     
     private static Polynomial parsePolynomial(final String line) {
         final String[] termsStrings = line.split("\\s+");
-        final Polynomial.DoubleBuilder builder =
-                Polynomial.getPolynomialDoubleBuilder();
+        final Polynomial.Builder builder =
+                Polynomial.getPolynomialBuilder();
         
         int coefficientIndex = 0;
         

@@ -537,15 +537,6 @@ public final class Polynomial {
     }
     
     /**
-     * Creates a new double builder and returns it.
-     * 
-     * @return a new polynomial double builder. 
-     */
-    public static DoubleBuilder getPolynomialDoubleBuilder() {
-        return new DoubleBuilder();
-    }
-    
-    /**
      * The class for building sparse polynomials.
      */
     public static final class Builder {
@@ -613,6 +604,54 @@ public final class Polynomial {
         }
         
         /**
+         * Populates the least-significant coefficients with the given 
+         * {@code long} values.
+         * 
+         * @param longs the coefficients to use.
+         * 
+         * @return this builder.
+         */
+        public Builder withLongs(final long... longs) {
+            for (int i = 0; i < longs.length; i++) {
+                add(i, longs[i]);
+            }
+            
+            return this;
+        }
+        
+        /**
+         * Populates the least-significant coefficients with the given 
+         * {@code double} values.
+         * 
+         * @param doubles the coefficients to use.
+         * 
+         * @return this builder.
+         */
+        public Builder withDoubles(final double... doubles) {
+            for (int i = 0; i < doubles.length; i++) {
+                add(i, doubles[i]);
+            }
+            
+            return this;
+        }
+        
+        /**
+         * Populates the least-significant coefficients with the given 
+         * {@code bigDecimals} values.
+         * 
+         * @param bigDecimals the coefficients to use.
+         * 
+         * @return this builder.
+         */
+        public Builder withBigDecimals(final BigDecimal... bigDecimals) {
+            for (int i = 0; i < bigDecimals.length; i++) {
+                add(i, bigDecimals[i]);
+            }
+            
+            return this;
+        }
+        
+        /**
          * Builds and returns the polynomial from this builder.
          * 
          * @return a polynomial.
@@ -639,137 +678,6 @@ public final class Polynomial {
             }
             
             return new Polynomial(coefficients);
-        }
-    }
-    
-    /**
-     * The class for building sparse polynomials from double coefficients.
-     */
-    public static final class DoubleBuilder {
-        
-        /**
-         * Maps the coefficient index to its coefficient value.
-         */
-        private final Map<Integer, Double> 
-                mapCoefficientIndexToCoefficient = new HashMap<>();
-        
-        /**
-         * The maximum coefficient index so far.
-         */
-        private int maximumCoefficientIndex = 0;
-        
-        /**
-         * Builds and returns a polynomial using the input coefficients.
-         * 
-         * @param coefficients the {@code double} array of coefficients.
-         * 
-         * @return a polynomial.
-         */
-        public Polynomial buildFrom(final double... coefficients) {
-            if (coefficients.length == 0) {
-                return new Polynomial();
-            }
-            
-            final DoubleBuilder builder = new DoubleBuilder();
-            
-            for (int i = 0; i < coefficients.length; i++) {
-                builder.add(i, coefficients[i]);
-            }
-            
-            return builder.build();
-        }
-        
-        /**
-         * Adds a new coefficient to this builder.
-         * 
-         * @param coefficientIndex the index of the coefficient.
-         * @param coefficient      the value of the coefficient.
-         * 
-         * @return this builder.
-         */
-        public DoubleBuilder add(final int coefficientIndex,
-                                 final double coefficient) {
-            
-            validateCoefficient(coefficientIndex,
-                                coefficient);
-            
-            this.maximumCoefficientIndex = 
-                    Math.max(this.maximumCoefficientIndex,
-                             coefficientIndex);
-            
-            mapCoefficientIndexToCoefficient.put(coefficientIndex, 
-                                                 coefficient);
-            
-            return this;
-        }
-        
-        /**
-         * Builds and returns the polynomial from this builder.
-         * 
-         * @return a polynomial.
-         */
-        public Polynomial build() {
-            final BigDecimal[] coefficients =
-                    new BigDecimal[maximumCoefficientIndex + 1];
-            
-            if (mapCoefficientIndexToCoefficient.isEmpty()) {
-                return new Polynomial();
-            }
-            
-            for (final Map.Entry<Integer, Double> e :
-                    mapCoefficientIndexToCoefficient.entrySet()) {
-                
-                coefficients[e.getKey()] = BigDecimal.valueOf(e.getValue());
-            }
-            
-            return new Polynomial(coefficients);
-        }
-        
-        /**
-         * Validates the coefficient.
-         * 
-         * @param coefficientIndex the index of the coefficient to validate.    
-         * @param coefficientValue the value of the coefficient to validate.
-         */
-        private static void validateCoefficient(final int coefficientIndex,
-                                                final double coefficientValue) {
-            if (Double.isNaN(coefficientValue)) {
-                reportNanException(coefficientIndex);
-            }
-            
-            if (Double.isInfinite(coefficientValue)) {
-                reportInfiniteException(coefficientIndex, coefficientValue);
-            }
-        }
-        
-        /**
-         * Builds and throws an exception reporting NaN coefficients.
-         * @param coefficientIndex 
-         */
-        private static void reportNanException(final int coefficientIndex) {
-            final String exceptionString = 
-                    String.format(
-                            "%dth coefficient is NaN",
-                            coefficientIndex);
-            
-            throw new IllegalArgumentException(exceptionString);
-        }
-        
-        /**
-         * Builds and throws an exception reporting infinite coefficients.
-         * 
-         * @param coefficientIndex the index of the coefficient.
-         * @param coefficient      the value of the coefficient (infinite).
-         */
-        private static void reportInfiniteException(final int coefficientIndex,
-                                                    final double coefficient) {
-            final String exceptionString = 
-                    String.format(
-                            "%dth coefficient is infinite: %f",
-                            coefficientIndex,
-                            coefficient);
-            
-            throw new IllegalArgumentException(exceptionString);
         }
     }
 }

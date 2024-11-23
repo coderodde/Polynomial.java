@@ -12,7 +12,7 @@ public final class PolynomialTest {
     public void evaluate1() {
         // 2x - 1
         Polynomial p1 = 
-                Polynomial.getPolynomialDoubleBuilder().buildFrom(-1, 2);
+                Polynomial.getPolynomialBuilder().withLongs(-1, 2).build();
         
         BigDecimal value = p1.evaluate(BigDecimal.valueOf(3.0));
         value = value.setScale(1);
@@ -22,8 +22,9 @@ public final class PolynomialTest {
     @Test
     public void evaluate2() {
         Polynomial p1 = 
-                Polynomial.getPolynomialDoubleBuilder()
-                          .buildFrom(-5.0, 3.0, 2.0); // 2x^2 + 3x - 5
+                Polynomial.getPolynomialBuilder()
+                          .withDoubles(-5.0, 3.0, 2.0)
+                          .build(); // 2x^2 + 3x - 5
         
         BigDecimal value = p1.evaluate(BigDecimal.valueOf(4.0));
         value = value.setScale(1);
@@ -31,42 +32,62 @@ public final class PolynomialTest {
     }
     
     @Test
-    public void getCoefficient() {
-        Polynomial p = Polynomial.getPolynomialDoubleBuilder()
-                                 .buildFrom(1, 2, 3, 4);
+    public void tryFakeDegree() {
+        Polynomial p = 
+                Polynomial.getPolynomialBuilder()
+                          .add(0, 2)
+                          .add(1, BigDecimal.valueOf(0.0))
+                          .add(2, BigDecimal.valueOf(0))
+                          .build();
         
-        assertEquals(BigDecimal.valueOf(1.0), p.getCoefficient(0));
-        assertEquals(BigDecimal.valueOf(2.0), p.getCoefficient(1));
-        assertEquals(BigDecimal.valueOf(3.0), p.getCoefficient(2));
-        assertEquals(BigDecimal.valueOf(4.0), p.getCoefficient(3));
+        assertEquals(0, p.getDegree());
+    }
+    
+    @Test
+    public void getCoefficient() {
+        Polynomial p = Polynomial.getPolynomialBuilder()
+                                 .withLongs(1, 2, 3, 4)
+                                 .build();
+        
+        assertEquals(BigDecimal.valueOf(1), p.getCoefficient(0));
+        assertEquals(BigDecimal.valueOf(2), p.getCoefficient(1));
+        assertEquals(BigDecimal.valueOf(3), p.getCoefficient(2));
+        assertEquals(BigDecimal.valueOf(4), p.getCoefficient(3));
     }
     
     @Test
     public void length() {
-        assertEquals(5, Polynomial.getPolynomialDoubleBuilder()
-                                  .buildFrom(3, -2, -1, 4, 2).length());
+        assertEquals(5, Polynomial.getPolynomialBuilder()
+                                  .withLongs(3, -2, -1, 4, 2)
+                                  .build()
+                                  .length());
     }
     
     @Test
     public void sum() {
-        Polynomial p1 = Polynomial.getPolynomialDoubleBuilder()
-                                   .buildFrom(3, -1, 2);
+        Polynomial p1 = Polynomial.getPolynomialBuilder()
+                                  .withLongs(3, -1, 2)
+                                  .build();
         
-        Polynomial p2 = Polynomial.getPolynomialDoubleBuilder()
-                                  .buildFrom(5, 4);
+        Polynomial p2 = Polynomial.getPolynomialBuilder()
+                                  .withLongs(5, 4)
+                                  .build();
         
         Polynomial sum = p1.sum(p2);
         
-        Polynomial expected = Polynomial.getPolynomialDoubleBuilder()
-                                        .buildFrom(8, 3, 2);
+        Polynomial expected = Polynomial.getPolynomialBuilder()
+                                        .withLongs(8, 3, 2)
+                                        .build();
         
         assertEquals(expected, sum);
     }
 
     @Test
     public void getDegree() {
-        assertEquals(3, Polynomial.getPolynomialDoubleBuilder()
-                                  .buildFrom(1, -2, 3, -4).getDegree());
+        assertEquals(3, Polynomial.getPolynomialBuilder()
+                                  .withLongs(1, -2, 3, -4)
+                                  .build()
+                                  .getDegree());
     }
     
     @Test
@@ -130,7 +151,9 @@ public final class PolynomialTest {
     @Test
     public void integrateDerivateTwice() {
         Polynomial p =
-                Polynomial.getPolynomialDoubleBuilder().buildFrom(1, -2, 3)
+                Polynomial.getPolynomialBuilder()
+                          .withLongs(1, -2, 3)
+                          .build()
                           .setScale(3);
         
         Polynomial next = p.integrate()
@@ -164,8 +187,9 @@ public final class PolynomialTest {
         
         assertEquals(3, product.getDegree());
         
-        Polynomial expected = Polynomial.getPolynomialDoubleBuilder()
-                                        .buildFrom(12, -5, 2, 1);
+        Polynomial expected = Polynomial.getPolynomialBuilder()
+                                        .withLongs(12, -5, 2, 1)
+                                        .build();
         
         product  = product .setScale(2);
         expected = expected.setScale(2);
@@ -196,8 +220,9 @@ public final class PolynomialTest {
         
         assertEquals(3, product.getDegree());
         
-        Polynomial expected = Polynomial.getPolynomialDoubleBuilder()
-                                        .buildFrom(12, -5, 2, 1);
+        Polynomial expected = Polynomial.getPolynomialBuilder()
+                                        .withLongs(12, -5, 2, 1)
+                                        .build();
         
         product  = product .setScale(2);
         expected = expected.setScale(2);
@@ -209,13 +234,15 @@ public final class PolynomialTest {
     public void negate() {
         Polynomial p = 
                 Polynomial
-                        .getPolynomialDoubleBuilder()
-                        .buildFrom(2, -3, 4, -5);
+                        .getPolynomialBuilder()
+                        .withLongs(2, -3, 4, -5)
+                        .build();
         
         Polynomial expected = 
                 Polynomial
-                        .getPolynomialDoubleBuilder()
-                        .buildFrom(-2, 3, -4, 5);
+                        .getPolynomialBuilder()
+                        .withLongs(-2, 3, -4, 5)
+                        .build();
         
         assertEquals(expected, p.negate());
     }
@@ -224,13 +251,15 @@ public final class PolynomialTest {
     public void shift() {
         Polynomial p = 
                 Polynomial
-                        .getPolynomialDoubleBuilder()
-                        .buildFrom(2, -3, 4, -5);
+                        .getPolynomialBuilder()
+                        .withLongs(2, -3, 4, -5)
+                        .build();
         
         Polynomial expected = 
                 Polynomial
-                        .getPolynomialDoubleBuilder()
-                        .buildFrom(0, 0, 2, -3, 4, -5);
+                        .getPolynomialBuilder()
+                        .withLongs(0, 0, 2, -3, 4, -5)
+                        .build();
         
         p = p.shift(2);
         
@@ -277,12 +306,12 @@ public final class PolynomialTest {
     
     @Test(expected = IllegalArgumentException.class)
     public void throwDoubleBuilderOnNanCoefficient() {
-        Polynomial.getPolynomialDoubleBuilder().add(3, Double.NaN);
+        Polynomial.getPolynomialBuilder().add(3, Double.NaN);
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void throwDoubleBuilderOnInfiniteCoefficient() {
-        Polynomial.getPolynomialDoubleBuilder()
+        Polynomial.getPolynomialBuilder()
                   .add(4, Double.NEGATIVE_INFINITY);
     }
     

@@ -6,7 +6,7 @@ import java.util.Arrays;
 /**
  * This class contains some polynomial multiplication algorithms.
  * 
- * @version 1.0.0 (Nov 22, 2024)
+ * @version 1.1.0 (Nov 23, 2024)
  * @since 1.0.0 (Nov 22, 2024)
  */
 public final class PolynomialMultiplier {
