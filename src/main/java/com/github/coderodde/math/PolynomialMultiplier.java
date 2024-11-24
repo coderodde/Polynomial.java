@@ -69,10 +69,56 @@ public final class PolynomialMultiplier {
         return rawPolynomial.adjustPolynomial();
     }
     
-//    public static Polynomial multiplyViaFFT(final Polynomial p1,
-//                                            final Polynomial p2) {
-//        final ComplexPolynomial dft = computeDiscreteFourierTransform();
-//    }
+    public static Polynomial multiplyViaFFT(Polynomial p1,
+                                            Polynomial p2) {
+        
+        final int length = Math.max(p1.length(), 
+                                    p2.length());
+        
+        final int n = Utils.getClosestUpwardPowerOfTwo(length) * 2;
+        
+        p1 = p1.setLength(n);
+        p2 = p2.setLength(n);
+        
+        return null;
+    }
+    
+    private static ComplexPolynomial 
+        computeFFT(final ComplexPolynomial complexPolynomial) {
+            
+        final int n = complexPolynomial.length();
+        
+        if (n == 1) {
+            return complexPolynomial;
+        }
+        
+        ComplexNumber omega = ComplexNumber.one(); 
+        
+        final ComplexNumber root  = ComplexNumber.getPrincipalRootOfUnity(n);
+        
+        final ComplexPolynomial[] a = complexPolynomial.split();
+        final ComplexPolynomial a0  = a[0];
+        final ComplexPolynomial a1  = a[1];
+        
+        final ComplexPolynomial y0 = computeFFT(a0);
+        final ComplexPolynomial y1 = computeFFT(a1);
+        final ComplexPolynomial y  = new ComplexPolynomial(n);
+        
+        for (int k = 0; k < n / 2; k++) {
+            final ComplexNumber y0k = y0.getCoefficient(k);
+            final ComplexNumber y1k = y1.getCoefficient(k);
+            
+            y.setCoefficient(k,         
+                             y0k.add(omega.multiply(y1k)));
+            
+            y.setCoefficient(k + n / 2, 
+                             y0k.substract(omega.multiply(y1k)));
+            
+            omega = omega.multiply(root);
+        }
+        
+        return y;
+    }
     
     private static Polynomial multiplyViaKaratsubaImpl(final Polynomial p1,
                                                        final Polynomial p2) {

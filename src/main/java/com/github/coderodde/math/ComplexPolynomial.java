@@ -25,43 +25,19 @@ public final class ComplexPolynomial {
         }
     }
     
-    public ComplexPolynomial growToNearestPowerOfTwo() {
-        int n = 1;
-        
-        while (n < coefficients.length) {
-            n *= 2;
-        }
-        
-        if (n == coefficients.length) {
-            return this;
-        }
-        
-        final ComplexPolynomial result = new ComplexPolynomial(n);
-        
-        System.arraycopy(
-                this.coefficients,
-                0,
-                result.coefficients, 
-                0, 
-                this.coefficients.length);
-        
-        final ComplexNumber zero = new ComplexNumber(BigDecimal.ZERO,
-                                                     BigDecimal.ZERO);
-        
-        for (int i = this.coefficients.length; i < n; i++) {
-            result.set(i, zero);
-        }
-        
-        return result;
+    public int length() {
+        return coefficients.length;
     }
     
-    public void set(final int coefficientIndex, 
+    public ComplexNumber getCoefficient(final int coefficientIndex) {
+        return coefficients[coefficientIndex];
+    }
+    
+    public void setCoefficient(final int coefficientIndex, 
                     final ComplexNumber coefficient) {
         
         this.coefficients[coefficientIndex] = coefficient;
     }
-    
-    
     
     public ComplexPolynomial[] split() {
         final int nextLength = coefficients.length / 2;
@@ -79,10 +55,10 @@ public final class ComplexPolynomial {
             
             if (readToFirst) {
                 readToFirst = false;
-                result[0].set(coefficientIndex1++, currentComplexNumber);
+                result[0].setCoefficient(coefficientIndex1++, currentComplexNumber);
             } else {
                 readToFirst = true;
-                result[1].set(coefficientIndex2++, currentComplexNumber);
+                result[1].setCoefficient(coefficientIndex2++, currentComplexNumber);
             }
         }
         

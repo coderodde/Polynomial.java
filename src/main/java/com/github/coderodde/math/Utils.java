@@ -50,4 +50,14 @@ public final class Utils {
         
         return BigDecimal.valueOf(longCoefficient);
     }
+    
+    public static int getClosestUpwardPowerOfTwo(final int n) {
+        int m = 1;
+        
+        while (m < n) {
+            m *= 2;
+        }
+        
+        return m;
+    }
 }

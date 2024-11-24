@@ -67,6 +67,20 @@ public final class ComplexNumber {
         return imagPart;
     }
     
+    public ComplexNumber add(final ComplexNumber other) {
+        return new ComplexNumber(realPart.add(other.realPart),
+                                 imagPart.add(other.imagPart));
+    }
+    
+    public ComplexNumber negate() {
+        return new ComplexNumber(realPart.negate(),
+                                 imagPart.negate());
+    }
+    
+    public ComplexNumber substract(final ComplexNumber other) {
+        return add(other.negate());
+    }
+    
     /**
      * Multiplies this complex number with the {@code other} complex number.
      * 
@@ -113,5 +127,9 @@ public final class ComplexNumber {
         final double im = Math.sin(u);
         
         return new ComplexNumber(re, im);
+    }
+    
+    public static ComplexNumber one() {
+        return new ComplexNumber();
     }
 }
