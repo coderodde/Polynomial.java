@@ -90,7 +90,6 @@ public final class ComplexPolynomial {
         if (length() == 0) {
             return coefficients[0].toString();
         }
-        
         final StringBuilder sb = new StringBuilder();
         
         boolean first = true;
@@ -105,7 +104,7 @@ public final class ComplexPolynomial {
                       sb.append(powerToSuperscript(pow));
                    }
             } else {
-                sb.append(getCoefficient(pow));
+                sb.append(" + ").append(getCoefficient(pow));
                 
                 if (pow > 0) {
                     sb.append("x");

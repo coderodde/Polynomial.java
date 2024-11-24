@@ -12,7 +12,7 @@ import java.util.Arrays;
 public final class PolynomialMultiplier {
     
     /**
-     * Multiplies {@code p1} and {@code p2} naively.
+     * Multiplies {@code p1} and {@code p2} naively in {@code O(NM)} time.
      * 
      * @param p1 the first polynomial.
      * @param p2 the second polynomial.
@@ -55,6 +55,18 @@ public final class PolynomialMultiplier {
         return new Polynomial(coefficientArray);
     }
     
+    /**
+     * Multiplies the two input polynomials in {@code O(N^(1.58)} time where 
+     * {@code N} is the degree-bound of both {@code p1} and {@code p2}. This
+     * implementation is adopted from 
+     * <a href="https://www.cs.dartmouth.edu/~deepc/LecNotes/cs31/lec6.pdf">
+     * these lecture slides</a>.
+     * 
+     * @param p1 the first polynomial.
+     * @param p2 the second polynomial.
+     * 
+     * @return the product of the two input polynomials.
+     */
     public static Polynomial multiplyViaKaratsuba(Polynomial p1,
                                                   Polynomial p2) {
         
@@ -69,6 +81,18 @@ public final class PolynomialMultiplier {
         return rawPolynomial.adjustPolynomial();
     }
     
+    /**
+     * Multiplies the two input polynomials in {@code O(N log N} time where 
+     * {@code N} is the degree-bound of both {@code p1} and {@code p2}. This
+     * implementation is adopted from 
+     * <a href="https://archive.org/details/introduction-to-algorithms-third-edition-2009/page/898/mode/1up?view=theater">
+     * Introduction to Algorirthms, 3rd edition, Chapter 30</a>.
+     * 
+     * @param p1 the first polynomial.
+     * @param p2 the second polynomial.
+     * 
+     * @return the product of the two input polynomials.
+     */
     public static Polynomial multiplyViaFFT(Polynomial p1,
                                             Polynomial p2) {
         
@@ -84,6 +108,8 @@ public final class PolynomialMultiplier {
         final ComplexPolynomial b = computeFFT(new ComplexPolynomial(p2));
         final ComplexPolynomial c = multiplyPointwise(a, b);
         final ComplexPolynomial r = computeInverseFFT(c);
+        
+        divide(r, n);
         
         return r.convertToPolynomial();
     }
@@ -175,16 +201,18 @@ public final class PolynomialMultiplier {
             
             omega = omega.multiply(root);
         }
-        
-        divide(y, n);
+//        
+//        divide(y, n);
         return y;
     }
         
-    private static void divide(final ComplexPolynomial cp, final int n) {
-        final ComplexNumber nn = new ComplexNumber(BigDecimal.valueOf(n));
+    private static void divide(final ComplexPolynomial cp, 
+                               final int n) {
+        
+        final BigDecimal nn = BigDecimal.valueOf(n);
         
         for (int i = 0; i < cp.length(); i++) {
-            cp.setCoefficient(i, cp.getCoefficient(i));
+            cp.setCoefficient(i, cp.getCoefficient(i).divide(nn));
         }
     }
     

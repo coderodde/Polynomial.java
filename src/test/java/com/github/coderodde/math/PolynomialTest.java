@@ -234,6 +234,33 @@ public final class PolynomialTest {
     
     @Test
     public void multiplyFFT() {
+        Polynomial a = // 2x + 3
+                Polynomial
+                        .getPolynomialBuilder()
+                        .withLongs(3, 2)
+                        .build();
+        Polynomial b = // 4x - 5
+                Polynomial
+                        .getPolynomialBuilder()
+                        .withLongs(-5, 4)
+                        .build();
+        
+        // (2x + 3) (4x - 5) = 8x^2 - 10x + 12x - 15
+        // = 8x^2 + 2x - 15
+        Polynomial r = PolynomialMultiplier.multiplyViaFFT(a, b)
+                                           .setScale(2, RoundingMode.HALF_EVEN)
+                                           .adjustPolynomial();
+        Polynomial expected = 
+                Polynomial.getPolynomialBuilder()
+                          .withLongs(-15, 2, 8)
+                          .build()
+                          .setScale(2);
+        
+        assertEquals(expected, r);
+    }
+    
+    @Test
+    public void multiplyFFT2() {
         // x^2 - 2x + 3
         Polynomial p1 = 
                 Polynomial
@@ -254,7 +281,8 @@ public final class PolynomialTest {
         Polynomial product = 
                 PolynomialMultiplier
                         .multiplyViaFFT(p1, p2)
-                        .setScale(2, RoundingMode.HALF_UP);
+                        .setScale(2, RoundingMode.HALF_UP)
+                        .adjustPolynomial();
         
         assertEquals(3, product.getDegree());
         

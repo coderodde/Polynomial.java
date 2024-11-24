@@ -6,7 +6,7 @@ import java.math.BigDecimal;
  * This class implements basic facilities for dealing with complex number in the
  * Fast Fourier Transform algorithms.
  * 
- * @version 1.0.0 (Nov 23, 2024)
+ * @version 1.1.0 (Nov 24, 2024)
  * @since 1.0.0 (Nov 23, 2024)
  */
 public final class ComplexNumber {
@@ -121,7 +121,7 @@ public final class ComplexNumber {
           .append(realPart)
           .append((imagPart.compareTo(BigDecimal.ZERO) > 0) ? " + " : " - ")
           .append(imagPart)
-          .append(")");
+          .append("i)");
         
         return sb.toString();
     }
