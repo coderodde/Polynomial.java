@@ -324,7 +324,7 @@ public final class PolynomialTest {
         
         p = Polynomial.getPolynomialBuilder()
                       .add(1, BigDecimal.ONE)
-                      .add(2, BigDecimal.ZERO.setScale(4))
+                      .add(2, BigDecimal.ZERO)
                       .build();
         
         assertEquals(1, p.getDegree());

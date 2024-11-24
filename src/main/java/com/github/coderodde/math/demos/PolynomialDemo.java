@@ -12,7 +12,7 @@ import java.util.Scanner;
 /**
  * This is demonstration program for the {@link Polynomial} class.
  * 
- * @version 1.2.0 (Nov 23, 2024)
+ * @version 1.2.1 (Nov 24, 2024)
  * @since 1.0.0 (Nov 21, 2024)
  */
 public final class PolynomialDemo {

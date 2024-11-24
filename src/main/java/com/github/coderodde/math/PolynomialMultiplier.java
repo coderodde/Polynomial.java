@@ -6,7 +6,7 @@ import java.util.Arrays;
 /**
  * This class contains some polynomial multiplication algorithms.
  * 
- * @version 1.1.0 (Nov 23, 2024)
+ * @version 1.1.1 (Nov 24, 2024)
  * @since 1.0.0 (Nov 22, 2024)
  */
 public final class PolynomialMultiplier {
@@ -64,30 +64,9 @@ public final class PolynomialMultiplier {
         p1 = p1.setLength(n);
         p2 = p2.setLength(n);
         
-        final BigDecimal[] productCoefficients = 
-                multiplyViaKaratsubaImpl(p1, p2).coefficients;
+        final Polynomial rawPolynomial = multiplyViaKaratsubaImpl(p1, p2);
         
-        int i = productCoefficients.length - 1;
-        
-        final int scale = productCoefficients[i].scale();
-        final BigDecimal MY_ZERO = BigDecimal.valueOf(0L).setScale(scale);
-        
-        for (; i >= 0; i--) {
-            if (!productCoefficients[i].equals(MY_ZERO)) {
-                break;
-            }
-        }
-        
-        final BigDecimal[] coefficients = new BigDecimal[i + 1];
-        
-        System.arraycopy(
-                productCoefficients, 
-                0, 
-                coefficients, 
-                0, 
-                coefficients.length);
-        
-        return new Polynomial(coefficients);
+        return rawPolynomial.adjustPolynomial();
     }
     
 //    public static Polynomial multiplyViaFFT(final Polynomial p1,
@@ -110,13 +89,16 @@ public final class PolynomialMultiplier {
         final BigDecimal[] qPrime = new BigDecimal[m + 1];
         
         for (int i = 0; i < m; i++) {
-            pPrime[i] = p1.getCoefficient(i).add(p1.getCoefficient(m + i));
-            qPrime[i] = p2.getCoefficient(i).add(p2.getCoefficient(m + i));
+            pPrime[i] = p1.getCoefficientInternal(i)
+                          .add(p1.getCoefficientInternal(m + i));
+            
+            qPrime[i] = p2.getCoefficientInternal(i)
+                          .add(p2.getCoefficientInternal(m + i));
         }
         
         if (n > 2 * m - 1) {
-            pPrime[m] = p1.getCoefficient(n);
-            qPrime[m] = p2.getCoefficient(n);
+            pPrime[m] = p1.getCoefficientInternal(n);
+            qPrime[m] = p2.getCoefficientInternal(n);
         } else {
             pPrime[m] = BigDecimal.ZERO;
             qPrime[m] = BigDecimal.ZERO;
@@ -156,17 +138,9 @@ public final class PolynomialMultiplier {
                                              final Polynomial r3,
                                              final int i) {
         
-        final BigDecimal term1 = i < 0 || i >= r1.length() ?
-                BigDecimal.ZERO :
-                r1.getCoefficient(i);
-        
-        final BigDecimal term2 = i < 0 || i >= r2.length() ?
-                BigDecimal.ZERO : 
-                r2.getCoefficient(i);
-        
-        final BigDecimal term3 = i < 0 || i >= r3.length() ? 
-                BigDecimal.ZERO : 
-                r3.getCoefficient(i);
+        final BigDecimal term1 = r1.getCoefficientInternal(i);
+        final BigDecimal term2 = r2.getCoefficientInternal(i);
+        final BigDecimal term3 = r3.getCoefficientInternal(i);
         
         return term3.add(term1.negate()).add(term2.negate());
     }
@@ -176,33 +150,20 @@ public final class PolynomialMultiplier {
                                              final Polynomial r4,
                                              final int i,
                                              final int m) {
-        final BigDecimal term1 = 
-                i < 0 || i >= r1.length() ? 
-                BigDecimal.ZERO :
-                r1.getCoefficient(i);
         
-        final BigDecimal term2 = 
-                i - m < 0 || i - m >= r4.length() ? 
-                BigDecimal.ZERO :
-                r4.getCoefficient(i - m);
+        final BigDecimal term1 = r1.getCoefficientInternal(i);
+        final BigDecimal term4 = r4.getCoefficientInternal(i - m);
+        final BigDecimal term2 = r2.getCoefficientInternal(i - m * 2);
         
-        final BigDecimal term3 = 
-                i - 2 * m < 0 || i - 2 * m >= r2.length() ?
-                BigDecimal.ZERO :
-                r2.getCoefficient(i - 2 * m);
-        
-        return term1.add(term2).add(term3);
+        return term1.add(term2).add(term4);
     }
     
     private static Polynomial getR1Polynomial(final Polynomial p,
                                               final Polynomial q,
                                               final int m) {
         
-        final BigDecimal[] pCoefficients = new BigDecimal[m];
-        final BigDecimal[] qCoefficients = new BigDecimal[m];
-        
-        System.arraycopy(p.coefficients, 0, pCoefficients, 0, m);
-        System.arraycopy(q.coefficients, 0, qCoefficients, 0, m);
+        final BigDecimal[] pCoefficients = p.toCoefficientArray(m);
+        final BigDecimal[] qCoefficients = q.toCoefficientArray(m);
         
         final Polynomial pResultPolynomial = new Polynomial(pCoefficients);
         final Polynomial qResultPolynomial = new Polynomial(qCoefficients);
@@ -216,11 +177,8 @@ public final class PolynomialMultiplier {
                                               final int m,
                                               final int n) {
         
-        final BigDecimal[] pCoefficients = new BigDecimal[n - m + 1];
-        final BigDecimal[] qCoefficients = new BigDecimal[n - m + 1];
-        
-        System.arraycopy(p.coefficients, m, pCoefficients, 0, n - m + 1);
-        System.arraycopy(q.coefficients, m, qCoefficients, 0, n - m + 1);
+        final BigDecimal[] pCoefficients = p.toCoefficientArray(m, n);
+        final BigDecimal[] qCoefficients = q.toCoefficientArray(m, n);
         
         final Polynomial pResultPolynomial = new Polynomial(pCoefficients);
         final Polynomial qResultPolynomial = new Polynomial(qCoefficients);

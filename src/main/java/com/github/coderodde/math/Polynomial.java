@@ -149,6 +149,14 @@ public final class Polynomial {
         return coefficientMap.get(coefficientIndex);
     }
     
+    BigDecimal getCoefficientInternal(final int coefficientIndex) {
+        if (!coefficientMap.containsKey(coefficientIndex)) {
+            return BigDecimal.ZERO;
+        }
+        
+        return coefficientMap.get(coefficientIndex);
+    }
+    
     /**
      * Gets the number of coefficients in this polynomial.
      * 
@@ -330,7 +338,10 @@ public final class Polynomial {
             
             nextCoefficientMap.put(
                     entry.getKey(), 
-                    new BigDecimal(entry.getValue().toString()));
+                    new BigDecimal(
+                            entry.getValue()
+                                 .toString())
+                            .setScale(scale));
         }
         
         return new Polynomial(degree, 
@@ -419,6 +430,56 @@ public final class Polynomial {
      */
     public Polynomial integrate() {
         return integrate(BigDecimal.ZERO);
+    }
+    
+    Polynomial adjustPolynomial() {
+        int d = degree;
+        
+        for (; d >= 0; d--) {
+            final BigDecimal coefficient = getCoefficient(d);
+            
+            if (!isZero(coefficient)) {
+                break;
+            }
+        }
+        
+        if (d == -1) {
+            return new Polynomial();
+        }
+        
+        return new Polynomial(d, coefficientMap);
+    }
+    
+    BigDecimal[] toCoefficientArray(final int m) {
+        final BigDecimal[] coefficientArray = new BigDecimal[m];
+        
+        for (int i = 0; i < m; i++) {
+            final BigDecimal coefficient = coefficientMap.get(i);
+            
+            coefficientArray[i] = 
+                    coefficient == null ?
+                    BigDecimal.ZERO :
+                    coefficient;
+        }
+        
+        return coefficientArray;
+    }
+    
+    BigDecimal[] toCoefficientArray(final int m,
+                                    final int n) {
+        
+        final BigDecimal[] coefficientArray = new BigDecimal[n - m + 1];
+        
+        for (int i = m; i <= n; i++) {
+            final BigDecimal coefficient = coefficientMap.get(i);
+            
+            coefficientArray[i - m] = 
+                    coefficient == null ?
+                    BigDecimal.ZERO :
+                    coefficient;
+        }
+        
+        return coefficientArray;
     }
     
     /**
@@ -537,21 +598,21 @@ public final class Polynomial {
         return new Polynomial(requestedLength - 1, 
                               nextCoefficientMap);
     }
-    
-    private int computeDegree() {
-        for (int i = degree; i >= 0; i--) {
-            final BigDecimal coefficient = getCoefficient(i);
-            final int coefficientScale = coefficient.scale();
-            final BigDecimal MY_ZERO = 
-                    BigDecimal.ZERO.setScale(coefficientScale);
-            
-            if (!coefficient.equals(MY_ZERO)) {
-                return i;
-            }
-        }
-        
-        return 0;
-    }
+//    
+//    private int computeDegree() {
+//        for (int i = degree; i >= 0; i--) {
+//            final BigDecimal coefficient = getCoefficient(i);
+//            final int coefficientScale = coefficient.scale();
+//            final BigDecimal MY_ZERO = 
+//                    BigDecimal.ZERO.setScale(coefficientScale);
+//            
+//            if (!coefficient.equals(MY_ZERO)) {
+//                return i;
+//            }
+//        }
+//        
+//        return 0;
+//    }
     
     /**
      * Converts the input power to a superscript string.
@@ -618,13 +679,16 @@ public final class Polynomial {
         public Builder add(final int coefficientIndex,
                            final BigDecimal coefficient) {
             
+            if (isZero(coefficient)) {
+                return this;
+            }
+            
             this.maximumDegree = 
                     Math.max(this.maximumDegree,
                              coefficientIndex);
             
             mapCoefficientIndexToCoefficient.put(coefficientIndex, 
                                                  coefficient);
-            
             return this;
         }
         
@@ -718,5 +782,9 @@ public final class Polynomial {
             return new Polynomial(maximumDegree, 
                                   nextCoefficientMap);
         }
+    }
+    
+    private static boolean isZero(final BigDecimal bd) {
+        return BigDecimal.ZERO.setScale(bd.scale()).equals(bd);
     }
 }

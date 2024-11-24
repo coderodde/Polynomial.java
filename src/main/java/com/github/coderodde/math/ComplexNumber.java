@@ -4,14 +4,21 @@ import java.math.BigDecimal;
 
 /**
  * This class implements basic facilities for dealing with complex number in the
- * Fast Fourier Transform algorihtms.
+ * Fast Fourier Transform algorithms.
  * 
  * @version 1.0.0 (Nov 23, 2024)
  * @since 1.0.0 (Nov 23, 2024)
  */
 public final class ComplexNumber {
     
+    /**
+     * The real part of this complex number.
+     */
     private final BigDecimal realPart;
+    
+    /**
+     * The imaginary part of this complex number.
+     */
     private final BigDecimal imagPart;
     
     public ComplexNumber(final BigDecimal realPart,
@@ -21,11 +28,20 @@ public final class ComplexNumber {
         this.imagPart = imagPart;
     }
     
+    /**
+     * Constructs this complex number as the real unity.
+     */
     public ComplexNumber() {
         this(BigDecimal.ONE,
              BigDecimal.ZERO);
     }
     
+    /**
+     * Constructs this complex number.
+     * 
+     * @param realPart the real part.
+     * @param imagPart the imaginary part.
+     */
     public ComplexNumber(final double realPart,
                          final double imagPart) {
         
@@ -33,6 +49,12 @@ public final class ComplexNumber {
              BigDecimal.valueOf(imagPart));
     }
     
+    /**
+     * Construct this complex number as a real number with value 
+     * {@code realPart}.
+     * 
+     * @param realPart the real part.
+     */
     public ComplexNumber(final BigDecimal realPart) {
         this(realPart, BigDecimal.ZERO);
     }
@@ -45,6 +67,13 @@ public final class ComplexNumber {
         return imagPart;
     }
     
+    /**
+     * Multiplies this complex number with the {@code other} complex number.
+     * 
+     * @param other the second complex number to multiply.
+     * 
+     * @return the complex product of this and {@code other} complex numbers. 
+     */
     public ComplexNumber multiply(final ComplexNumber other) {
         final BigDecimal resultRealPart = 
                 realPart.multiply(other.realPart)
@@ -70,9 +99,16 @@ public final class ComplexNumber {
         return sb.toString();
     }
     
+    /**
+     * Returns the {@code n}th principal complex root of unity.
+     * 
+     * @param n the root order.
+     * 
+     * @return a principal complex root of unity.
+     */
     public static ComplexNumber getPrincipalRootOfUnity(final int n) {
         
-        final double u = 2.0 * Math.PI / (double) n;
+        final double u  = 2.0 * Math.PI / (double) n;
         final double re = Math.cos(u);
         final double im = Math.sin(u);
         
