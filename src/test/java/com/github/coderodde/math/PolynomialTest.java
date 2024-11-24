@@ -2,6 +2,8 @@ package com.github.coderodde.math;
 
 import static com.github.coderodde.math.Utils.getRandomPolynomial;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Random;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -217,6 +219,42 @@ public final class PolynomialTest {
         
         // (x^3 - 2x^2 + 3x) + (4x^2 - 8x + 12) = x^3 + 2x^2 - 5x + 12
         Polynomial product = PolynomialMultiplier.multiplyViaKaratsuba(p1, p2); 
+        
+        assertEquals(3, product.getDegree());
+        
+        Polynomial expected = Polynomial.getPolynomialBuilder()
+                                        .withLongs(12, -5, 2, 1)
+                                        .build();
+        
+        product  = product .setScale(2);
+        expected = expected.setScale(2);
+        
+        assertEquals(expected, product);
+    }
+    
+    @Test
+    public void multiplyFFT() {
+        // x^2 - 2x + 3
+        Polynomial p1 = 
+                Polynomial
+                        .getPolynomialBuilder()
+                        .add(0, BigDecimal.valueOf(3).setScale(1))
+                        .add(1, BigDecimal.valueOf(-2).setScale(1))
+                        .add(2, BigDecimal.valueOf(1).setScale(1))
+                        .build();
+        // x + 4
+        Polynomial p2 = 
+                Polynomial
+                        .getPolynomialBuilder()
+                        .add(0, BigDecimal.valueOf(4).setScale(1))
+                        .add(1, BigDecimal.valueOf(1).setScale(1))
+                        .build();
+        
+        // (x^3 - 2x^2 + 3x) + (4x^2 - 8x + 12) = x^3 + 2x^2 - 5x + 12
+        Polynomial product = 
+                PolynomialMultiplier
+                        .multiplyViaFFT(p1, p2)
+                        .setScale(2, RoundingMode.HALF_UP);
         
         assertEquals(3, product.getDegree());
         

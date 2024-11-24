@@ -313,11 +313,14 @@ public final class Polynomial {
      * Copies this polynomial with the input scale applied to all coefficients 
      * in this polynomial.
      * 
-     * @param scale the next scale to use.
+     * @param scale        the next scale to use.
+     * @param roundingMode the rounding mode.
      * 
      * @return a new scaled polynomial copy.
      */
-    public Polynomial setScale(final int scale) {
+    public Polynomial setScale(final int scale, 
+                               final RoundingMode roundingMode) {
+        
         final Map<Integer, BigDecimal> nextCoefficientMap = 
                 new HashMap<>(coefficientMap.size());
         
@@ -329,12 +332,16 @@ public final class Polynomial {
                     new BigDecimal(
                             entry.getValue()
                                  .toString())
-                            .setScale(scale));
+                            .setScale(scale, roundingMode));
         }
         
         return new Polynomial(degree, 
                               nextCoefficientMap);
     }
+    
+    public Polynomial setScale(final int scale) {
+        return setScale(scale, RoundingMode.HALF_UP);
+    }  
     
     /**
      * Negates this polynomial.
