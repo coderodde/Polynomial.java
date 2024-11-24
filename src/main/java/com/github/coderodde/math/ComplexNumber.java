@@ -81,6 +81,10 @@ public final class ComplexNumber {
         return add(other.negate());
     }
     
+    public ComplexNumber getConjugate() {
+        return new ComplexNumber(realPart, imagPart.negate());
+    }
+    
     /**
      * Multiplies this complex number with the {@code other} complex number.
      * 
@@ -101,14 +105,23 @@ public final class ComplexNumber {
                                  resultImagPart);
     }
     
+    public ComplexNumber divide(final BigDecimal r) {
+        return new ComplexNumber(realPart.divide(r),
+                                 imagPart.divide(r));
+    }
+    
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         
-        sb.append("[Complex; re = ")
+        if (imagPart.equals(BigDecimal.ZERO)) {
+            return realPart.toString();
+        }
+        
+        sb.append("(")
           .append(realPart)
-          .append(", im = ")
+          .append((imagPart.compareTo(BigDecimal.ZERO) > 0) ? " + " : " - ")
           .append(imagPart)
-          .append("]");
+          .append(")");
         
         return sb.toString();
     }

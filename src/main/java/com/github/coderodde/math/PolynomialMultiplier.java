@@ -80,7 +80,28 @@ public final class PolynomialMultiplier {
         p1 = p1.setLength(n);
         p2 = p2.setLength(n);
         
-        return null;
+        final ComplexPolynomial a = computeFFT(new ComplexPolynomial(p1));
+        final ComplexPolynomial b = computeFFT(new ComplexPolynomial(p2));
+        final ComplexPolynomial c = multiplyPointwise(a, b);
+        final ComplexPolynomial r = computeInverseFFT(c);
+        
+        return r.convertToPolynomial();
+    }
+    
+    private static ComplexPolynomial 
+        multiplyPointwise(final ComplexPolynomial a,
+                          final ComplexPolynomial b) {
+        
+        final ComplexPolynomial c = new ComplexPolynomial(a.length());
+        
+        for (int i = 0; i < c.length(); i++) {
+            c.setCoefficient(
+                    i, 
+                    a.getCoefficient(i)
+                     .multiply(b.getCoefficient(i)));
+        }
+        
+        return c;
     }
     
     private static ComplexPolynomial 
@@ -118,6 +139,53 @@ public final class PolynomialMultiplier {
         }
         
         return y;
+    }
+    
+    private static ComplexPolynomial 
+        computeInverseFFT(final ComplexPolynomial complexPolynomial) {
+            
+        final int n = complexPolynomial.length();
+        
+        if (n == 1) {
+            return complexPolynomial;
+        }
+        
+        ComplexNumber omega = ComplexNumber.one(); 
+        
+        final ComplexNumber root  = 
+                ComplexNumber.getPrincipalRootOfUnity(n).getConjugate();
+        
+        final ComplexPolynomial[] a = complexPolynomial.split();
+        final ComplexPolynomial a0  = a[0];
+        final ComplexPolynomial a1  = a[1];
+        
+        final ComplexPolynomial y0 = computeFFT(a0);
+        final ComplexPolynomial y1 = computeFFT(a1);
+        final ComplexPolynomial y  = new ComplexPolynomial(n);
+        
+        for (int k = 0; k < n / 2; k++) {
+            final ComplexNumber y0k = y0.getCoefficient(k);
+            final ComplexNumber y1k = y1.getCoefficient(k);
+            
+            y.setCoefficient(k,         
+                             y0k.add(omega.multiply(y1k)));
+            
+            y.setCoefficient(k + n / 2, 
+                             y0k.substract(omega.multiply(y1k)));
+            
+            omega = omega.multiply(root);
+        }
+        
+        divide(y, n);
+        return y;
+    }
+        
+    private static void divide(final ComplexPolynomial cp, final int n) {
+        final ComplexNumber nn = new ComplexNumber(BigDecimal.valueOf(n));
+        
+        for (int i = 0; i < cp.length(); i++) {
+            cp.setCoefficient(i, cp.getCoefficient(i));
+        }
     }
     
     private static Polynomial multiplyViaKaratsubaImpl(final Polynomial p1,

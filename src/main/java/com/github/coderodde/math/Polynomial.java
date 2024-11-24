@@ -1,5 +1,6 @@
 package com.github.coderodde.math;
 
+import static com.github.coderodde.math.Utils.powerToSuperscript;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
@@ -14,23 +15,6 @@ import java.util.Objects;
  * @since 1.0.0 (Nov 21, 2024)
  */
 public final class Polynomial {
-    
-    /**
-     * Maps each digit character to its superscript counterpart.
-     */
-    private static final Map<Character, Character>
-            MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT = new HashMap<>(10);
-    
-    static {
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('2', '²');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('3', '³');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('4', '\u2074');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('5', '\u2075');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('6', '\u2076');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('7', '\u2077');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('8', '\u2078');  
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('9', '\u2079');   
-    }
     
     /**
      * The actual array storing coefficients. {@code coefficients[i]} is the 
@@ -65,6 +49,10 @@ public final class Polynomial {
             this.degree = p.degree;
             this.coefficientMap = p.coefficientMap;
         }
+    }
+    
+    public Polynomial(final int length) {
+        this.degree = length - 1;
     }
     
     private Polynomial(final int degree,
@@ -614,26 +602,6 @@ public final class Polynomial {
 //        return 0;
 //    }
     
-    /**
-     * Converts the input power to a superscript string.
-     * 
-     * @param pow the power to process.
-     * 
-     * @return a superscript representation of the input power.
-     */
-    private static String powerToSuperscript(final int pow) {
-        final String powString = Integer.toString(pow);
-        final int powStringLength = powString.length();
-        final StringBuilder sb = new StringBuilder(powStringLength);
-        
-        for (int i = 0; i < powStringLength; i++) {
-            final char ch = powString.charAt(i);
-            final char nextChar = MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.get(ch);
-            sb.append(nextChar);
-        }
-        
-        return sb.toString();
-    }
     
     private static boolean approximatelyEquals(final BigDecimal bd1,
                                                final BigDecimal bd2,

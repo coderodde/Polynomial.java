@@ -1,5 +1,6 @@
 package com.github.coderodde.math;
 
+import static com.github.coderodde.math.Utils.powerToSuperscript;
 import java.math.BigDecimal;
 
 /**
@@ -55,13 +56,67 @@ public final class ComplexPolynomial {
             
             if (readToFirst) {
                 readToFirst = false;
-                result[0].setCoefficient(coefficientIndex1++, currentComplexNumber);
+                result[0].setCoefficient(coefficientIndex1++,
+                                         currentComplexNumber);
             } else {
                 readToFirst = true;
-                result[1].setCoefficient(coefficientIndex2++, currentComplexNumber);
+                result[1].setCoefficient(coefficientIndex2++, 
+                                         currentComplexNumber);
             }
         }
         
         return result;
+    }
+    
+    /**
+     * Converts this complex polynomial to an ordinary polynomial by ignoring 
+     * the imaginary parts in this complex polynomial and copying only the 
+     * real part to the resultant polynomial.
+     * 
+     * @return an ordinary polynomial.
+     */
+    public Polynomial convertToPolynomial() {
+        final BigDecimal[] data = new BigDecimal[length()];
+        
+        for (int i = 0; i < length(); i++) {
+            data[i] = coefficients[i].getRealPart();
+        }
+        
+        return new Polynomial(data);
+    }
+    
+    @Override
+    public String toString() {
+        if (length() == 0) {
+            return coefficients[0].toString();
+        }
+        
+        final StringBuilder sb = new StringBuilder();
+        
+        boolean first = true;
+        
+        for (int pow = length() - 1; pow >= 0; pow--) {
+            if (first) {
+                first = false;
+                sb.append(getCoefficient(pow))
+                  .append("x");
+                
+                   if (pow > 1) {
+                      sb.append(powerToSuperscript(pow));
+                   }
+            } else {
+                sb.append(getCoefficient(pow));
+                
+                if (pow > 0) {
+                    sb.append("x");
+                }
+                
+                if (pow > 1) {
+                    sb.append(powerToSuperscript(pow));
+                }
+            }
+        }
+        
+        return sb.toString().replaceAll(",", ".");
     }
 }
