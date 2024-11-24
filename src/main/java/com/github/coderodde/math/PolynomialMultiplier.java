@@ -90,6 +90,11 @@ public final class PolynomialMultiplier {
         return new Polynomial(coefficients);
     }
     
+//    public static Polynomial multiplyViaFFT(final Polynomial p1,
+//                                            final Polynomial p2) {
+//        final ComplexPolynomial dft = computeDiscreteFourierTransform();
+//    }
+    
     private static Polynomial multiplyViaKaratsubaImpl(final Polynomial p1,
                                                        final Polynomial p2) {
         final int n = Math.max(p1.getDegree(),

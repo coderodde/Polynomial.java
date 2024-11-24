@@ -37,8 +37,11 @@ public final class Polynomial {
      * coefficient of the term with degree {@code i}, so the constant term 
      * appears at {@code coefficients[0]}.
      */
-    final BigDecimal[] coefficients;
+    Map<Integer, BigDecimal> coefficientMap = new HashMap<>();
     
+    /**
+     * The degree of this polynomial, i.e., the power of the highest-order term.
+     */
     private final int degree;
      
     /**
@@ -51,12 +54,23 @@ public final class Polynomial {
     public Polynomial(final BigDecimal... coefficients) {
         if (coefficients.length == 0) {
             // Special case: the null polynomial y = 0:
-            this.coefficients = new BigDecimal[]{ BigDecimal.ZERO };
+            this.coefficientMap.put(0, BigDecimal.ZERO);
             this.degree = 0;
         } else {
-            this.coefficients = coefficients;
-            this.degree = computeDegree();
+            final Polynomial p = 
+                    getPolynomialBuilder()
+                            .withBigDecimals(coefficients)
+                            .build();
+            
+            this.degree = p.degree;
+            this.coefficientMap = p.coefficientMap;
         }
+    }
+    
+    private Polynomial(final int degree,
+                       final Map<Integer, BigDecimal> coefficientMap) {
+        this.degree = degree;
+        this.coefficientMap = coefficientMap;
     }
     
     /**
@@ -69,10 +83,50 @@ public final class Polynomial {
      */
     public BigDecimal evaluate(final BigDecimal x) {
         Objects.requireNonNull(x, "The x coordinate is null");
-        BigDecimal value = coefficients[coefficients.length - 1];
+        BigDecimal value = getCoefficient(degree);
         
-        for (int i = coefficients.length - 2; i >= 0; i--) {
-            value = value.multiply(x).add(coefficients[i]);
+        for (int i = degree - 1; i >= 0; i--) {
+            value = value.multiply(x).add(getCoefficient(i));
+        }
+        
+        return value;
+    }
+    
+    /**
+     * Evaluates this polynomial at the point {@code x} using Horner's rule.
+     * 
+     * @param x the argument value for this polynomial.
+     * 
+     * @return the value of this polynomial at the specified {@code x}
+     *         coordinate.
+     */
+    public BigDecimal evaluate(final double x) {
+        Objects.requireNonNull(x, "The x coordinate is null");
+        BigDecimal value = getCoefficient(degree);
+        BigDecimal xx = BigDecimal.valueOf(x);
+        
+        for (int i = degree - 1; i >= 0; i--) {
+            value = value.multiply(xx).add(getCoefficient(i));
+        }
+        
+        return value;
+    }
+    
+    /**
+     * Evaluates this polynomial at the point {@code x} using Horner's rule.
+     * 
+     * @param x the argument value for this polynomial.
+     * 
+     * @return the value of this polynomial at the specified {@code x}
+     *         coordinate.
+     */
+    public BigDecimal evaluate(final long x) {
+        Objects.requireNonNull(x, "The x coordinate is null");
+        BigDecimal value = getCoefficient(degree);
+        BigDecimal xx = BigDecimal.valueOf(x);
+        
+        for (int i = degree - 1; i >= 0; i--) {
+            value = value.multiply(xx).add(getCoefficient(i));
         }
         
         return value;
@@ -86,18 +140,13 @@ public final class Polynomial {
      * @return                 the target coefficient.
      */
     public BigDecimal getCoefficient(final int coefficientIndex) {
-        try {
-            return coefficients[coefficientIndex];
-        } catch (final ArrayIndexOutOfBoundsException ex) {
-            final String exceptionMessage = 
-                    String.format(
-                            "coefficientIndex[%d] is out of " + 
-                            "valid bounds [0, %d)", 
-                            coefficientIndex, 
-                            coefficients.length);
-            
-            throw new IllegalArgumentException(exceptionMessage, ex);
+        checkCoefficientIndex(coefficientIndex);
+        
+        if (!coefficientMap.containsKey(coefficientIndex)) {
+            return BigDecimal.ZERO;
         }
+        
+        return coefficientMap.get(coefficientIndex);
     }
     
     /**
@@ -173,7 +222,10 @@ public final class Polynomial {
      * @return the scale of this polynomial.
      */
     public int scale() {
-        return coefficients[0].scale();
+        return coefficientMap.values()
+                             .iterator()
+                             .next()
+                             .scale();
     }
     
     /**
@@ -185,11 +237,9 @@ public final class Polynomial {
     public boolean isUniformlyScaled() {
         final int scale = scale();
         
-        for (int i = 1; i < coefficients.length; i++) {
-            final BigDecimal coefficient = coefficients[i];
-            
+        for (final BigDecimal coefficient : coefficientMap.values()) {
             if (coefficient != BigDecimal.ZERO 
-                    && scale != coefficient.scale()) {
+                   && scale != coefficient.scale()) {
                 
                 return false;
             }
@@ -272,13 +322,19 @@ public final class Polynomial {
      * @return a new scaled polynomial copy.
      */
     public Polynomial setScale(final int scale) {
-        final BigDecimal[] coefficients = new BigDecimal[length()];
+        final Map<Integer, BigDecimal> nextCoefficientMap = 
+                new HashMap<>(coefficientMap.size());
         
-        for (int i = 0; i < length(); i++) {
-            coefficients[i] = this.coefficients[i].setScale(scale);
+        for (final Map.Entry<Integer, BigDecimal> entry
+                : coefficientMap.entrySet()) {
+            
+            nextCoefficientMap.put(
+                    entry.getKey(), 
+                    new BigDecimal(entry.getValue().toString()));
         }
         
-        return new Polynomial(coefficients);
+        return new Polynomial(degree, 
+                              nextCoefficientMap);
     }
     
     /**
@@ -287,13 +343,17 @@ public final class Polynomial {
      * @return the negation of this polynomial.
      */
     public Polynomial negate() {
-        final BigDecimal[] coefficients = new BigDecimal[length()];
+        final Map<Integer, BigDecimal> nextCoefficietMap = 
+                new HashMap<>(coefficientMap.size());
         
-        for (int i = 0; i < coefficients.length; i++) {
-            coefficients[i] = this.coefficients[i].negate();
+        for (final Map.Entry<Integer, BigDecimal> entry 
+                : coefficientMap.entrySet()) {
+            
+            nextCoefficietMap.put(entry.getKey(), entry.getValue().negate());
         }
         
-        return new Polynomial(coefficients);
+        return new Polynomial(degree,
+                              nextCoefficietMap);
     }
     
     /**
@@ -302,19 +362,22 @@ public final class Polynomial {
      * @return the derivative of this polynomial. 
      */
     public Polynomial derivate() {
-        final BigDecimal[] coefficients = new BigDecimal[length() - 1];
+        final Map<Integer, BigDecimal> nextCoefficientMap = 
+                new HashMap<>(coefficientMap.size() - 1);
         
         for (int pow = 1;
                  pow < length();
                  pow++) {
             
-            coefficients[pow - 1] = 
+            nextCoefficientMap.put(
+                    pow - 1, 
                     getDerivateCoefficient(
-                            this.coefficients[pow],
-                            pow);
+                            getCoefficient(pow),
+                            pow));
         }
         
-        return new Polynomial(coefficients);
+        return new Polynomial(degree - 1, 
+                              nextCoefficientMap);
     }
     
     /**
@@ -330,20 +393,23 @@ public final class Polynomial {
                 integrationConstant, 
                 "The input integration constant is null");
         
-        final BigDecimal[] coefficients = new BigDecimal[length() + 1];
-        coefficients[0] = integrationConstant;
+        final Map<Integer, BigDecimal> nextCoefficientMap = 
+                new HashMap<>(coefficientMap.size() + 1);
+        
+        nextCoefficientMap.put(0, integrationConstant);
         
         for (int pow = 0; 
                  pow < length(); 
                  pow++) { 
             
-            coefficients[pow + 1] = 
+            nextCoefficientMap.put(
+                    pow + 1,
                     integrateTerm(
-                            this.coefficients[pow],
-                            pow);
+                            getCoefficient(pow), 
+                            pow));
         }
         
-        return new Polynomial(coefficients);
+        return new Polynomial(degree + 1, nextCoefficientMap);
     }
     
     /**
@@ -356,31 +422,28 @@ public final class Polynomial {
     }
     
     /**
-     * Shifts all the coefficients {@code m} positions towards the terms with 
-     * higher degree terms. Effectively, this method produces the product of 
-     * this polynomial and {@code x^m}.
+     * Validates the input coefficient index.
      * 
-     * @param m the shift length.
-     * 
-     * @return the shifted polynomial.
+     * @param coefficientIndex the coefficient index to validate.
      */
-    public Polynomial shift(final int m) {
-        final BigDecimal[] coefficients = new BigDecimal[length() + m];
+    private void checkCoefficientIndex(final int coefficientIndex) {
+        if (coefficientIndex < 0) {
+            final String exceptionMessage = 
+                    String.format("Invalid coefficient index: %d",
+                                  coefficientIndex);
+            
+            throw new IndexOutOfBoundsException(exceptionMessage);
+        }
         
-        System.arraycopy(
-                this.coefficients,
-                0,
-                coefficients, 
-                m,
-                length());
-        
-        Arrays.fill(
-                coefficients, 
-                0, 
-                m, 
-                BigDecimal.ZERO);
-        
-        return new Polynomial(coefficients);
+        if (coefficientIndex > degree) {
+            final String exceptionMessage = 
+                String.format(
+                    "Coefficient index too large: %d, must be at most %d",
+                    coefficientIndex,
+                    degree);
+            
+            throw new IndexOutOfBoundsException(exceptionMessage);
+        }
     }
     
     private BigDecimal integrateTerm(final BigDecimal coefficient, 
@@ -402,16 +465,19 @@ public final class Polynomial {
     
     @Override
     public int hashCode() {
-        // Generated by NetBeans 23:
-        int hash = 3;
-        hash = 43 * hash + Arrays.hashCode(coefficients);
-        return hash;
+        return coefficientMap.hashCode();
     }
     
     @Override
     public String toString() {
         if (getDegree() == 0) {
-            return String.format("%f", coefficients[0]).replace(",", ".");
+            return String.format(
+                    "%f",
+                    coefficientMap
+                            .values()
+                            .iterator()
+                            .next())
+                    .replace(",", ".");
         }
         
         final StringBuilder sb = new StringBuilder();
@@ -465,27 +531,16 @@ public final class Polynomial {
             return this;
         }
         
-        final BigDecimal[] nextCoefficients = new BigDecimal[requestedLength];
+        final Map<Integer, BigDecimal> nextCoefficientMap = 
+                new HashMap<>(coefficientMap);
         
-        System.arraycopy(
-                coefficients,
-                0, 
-                nextCoefficients,
-                0,
-                length());
-        
-        Arrays.fill(
-                nextCoefficients,
-                length(),
-                requestedLength,
-                BigDecimal.ZERO);
-        
-        return new Polynomial(nextCoefficients);
+        return new Polynomial(requestedLength - 1, 
+                              nextCoefficientMap);
     }
     
     private int computeDegree() {
-        for (int i = coefficients.length - 1; i >= 0; i--) {
-            final BigDecimal coefficient = coefficients[i];
+        for (int i = degree; i >= 0; i--) {
+            final BigDecimal coefficient = getCoefficient(i);
             final int coefficientScale = coefficient.scale();
             final BigDecimal MY_ZERO = 
                     BigDecimal.ZERO.setScale(coefficientScale);
@@ -550,7 +605,7 @@ public final class Polynomial {
         /**
          * The maximum coefficient index so far.
          */
-        private int maximumCoefficientIndex = 0;
+        private int maximumDegree = 0;
         
         /**
          * Adds a new coefficient to this builder.
@@ -563,8 +618,8 @@ public final class Polynomial {
         public Builder add(final int coefficientIndex,
                            final BigDecimal coefficient) {
             
-            this.maximumCoefficientIndex = 
-                    Math.max(this.maximumCoefficientIndex,
+            this.maximumDegree = 
+                    Math.max(this.maximumDegree,
                              coefficientIndex);
             
             mapCoefficientIndexToCoefficient.put(coefficientIndex, 
@@ -657,27 +712,11 @@ public final class Polynomial {
          * @return a polynomial.
          */
         public Polynomial build() {
-            final BigDecimal[] coefficients =
-                    new BigDecimal[maximumCoefficientIndex + 1];
+            final Map<Integer, BigDecimal> nextCoefficientMap =
+                    new HashMap<>(mapCoefficientIndexToCoefficient);
             
-            if (mapCoefficientIndexToCoefficient.isEmpty()) {
-                // Special case: return null polynomial y = 0:
-                return new Polynomial();
-            }
-            
-            Arrays.fill(
-                    coefficients,
-                    0,
-                    coefficients.length, 
-                    BigDecimal.ZERO);
-            
-            for (final Map.Entry<Integer, BigDecimal> e :
-                    mapCoefficientIndexToCoefficient.entrySet()) {
-                
-                coefficients[e.getKey()] = e.getValue();
-            }
-            
-            return new Polynomial(coefficients);
+            return new Polynomial(maximumDegree, 
+                                  nextCoefficientMap);
         }
     }
 }

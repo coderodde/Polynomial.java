@@ -248,28 +248,6 @@ public final class PolynomialTest {
     }
     
     @Test
-    public void shift() {
-        Polynomial p = 
-                Polynomial
-                        .getPolynomialBuilder()
-                        .withLongs(2, -3, 4, -5)
-                        .build();
-        
-        Polynomial expected = 
-                Polynomial
-                        .getPolynomialBuilder()
-                        .withLongs(0, 0, 2, -3, 4, -5)
-                        .build();
-        
-        p = p.shift(2);
-        
-        p = p.setScale(2);
-        expected = expected.setScale(2);
-        
-        assertEquals(expected, p);
-    }
-    
-    @Test
     public void testConstructEmptyPolynomial() {
         Polynomial p = new Polynomial();
         
