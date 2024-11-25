@@ -2,7 +2,6 @@ package com.github.coderodde.math;
 
 import static com.github.coderodde.math.Utils.getRandomPolynomial;
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Random;
 import org.junit.Test;
@@ -284,14 +283,17 @@ public final class PolynomialTest {
                         .setScale(2, RoundingMode.HALF_UP)
                         .adjustPolynomial();
         
-        assertEquals(3, product.getDegree());
-        
         Polynomial expected = Polynomial.getPolynomialBuilder()
                                         .withLongs(12, -5, 2, 1)
                                         .build();
         
+        System.out.println("product  = " + product);
+        System.out.println("expected = " + expected);
+        
         product  = product .setScale(2);
         expected = expected.setScale(2);
+        
+        assertEquals(3, product.getDegree());
         
         assertEquals(expected, product);
     }
@@ -511,6 +513,29 @@ public final class PolynomialTest {
                     PolynomialMultiplier
                             .multiplyViaKaratsuba(p1,
                                                   p2).setScale(2);
+            
+            assertTrue(product1.approximateEquals(product2, epsilon));
+        }
+    }
+    
+    @Test
+    public void bruteForceKaratsubaVsFFT() {
+        final Random random = new Random(13L);
+        final BigDecimal epsilon = BigDecimal.valueOf(0.01);
+        
+        for (int iter = 0; iter < 100; iter++) {
+            final Polynomial p1 = getRandomPolynomial(random).setScale(4);
+            final Polynomial p2 = getRandomPolynomial(random).setScale(4);
+            System.out.println("iter = " + iter);
+            final Polynomial product1 = 
+                    PolynomialMultiplier
+                            .multiplyViaNaive(p1,
+                                              p2).setScale(2);
+            
+            final Polynomial product2 = 
+                    PolynomialMultiplier
+                            .multiplyViaFFT(p1,
+                                            p2).setScale(2);
             
             assertTrue(product1.approximateEquals(product2, epsilon));
         }

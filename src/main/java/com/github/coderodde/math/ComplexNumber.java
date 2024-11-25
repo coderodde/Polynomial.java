@@ -110,6 +110,27 @@ public final class ComplexNumber {
                                  imagPart.divide(r));
     }
     
+    @Override
+    public boolean equals(final Object o) {
+        if (o == this) {
+            return true;
+        }
+        
+        if (o == null) {
+            return false;
+        }
+        
+        if (!getClass().equals(o.getClass())) {
+            return false;
+        }
+        
+        final ComplexNumber other = (ComplexNumber) o;
+        
+        return realPart.equals(other.realPart) &&
+               imagPart.equals(other.imagPart);
+    }
+    
+    @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         
@@ -144,5 +165,9 @@ public final class ComplexNumber {
     
     public static ComplexNumber one() {
         return new ComplexNumber();
+    }
+    
+    public static ComplexNumber zero() {
+        return new ComplexNumber(BigDecimal.ZERO);
     }
 }

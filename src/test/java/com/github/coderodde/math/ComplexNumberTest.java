@@ -19,4 +19,14 @@ public final class ComplexNumberTest {
         assertEquals(BigDecimal.valueOf(5).setScale(2), 
                      product.getImaginaryPart());
     }
+    
+    @Test
+    public void substract() {
+        ComplexNumber cn1 = new ComplexNumber(1, 2);
+        ComplexNumber cn2 = new ComplexNumber(4, -1);
+        ComplexNumber sub = cn1.substract(cn2);
+        ComplexNumber expected = new ComplexNumber(-3, 3);
+        
+        assertEquals(expected, sub);
+    }
 }
