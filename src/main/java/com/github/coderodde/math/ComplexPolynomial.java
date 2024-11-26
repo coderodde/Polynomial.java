@@ -26,6 +26,30 @@ public final class ComplexPolynomial {
         }
     }
     
+    ComplexPolynomial(final ComplexNumber[] coefficients) {
+        this.coefficients = coefficients;
+    }
+    
+    public ComplexPolynomial shrinkToHalf() {
+        final ComplexNumber[] coefficients = new ComplexNumber[length() / 2];
+        
+        for (int i = 0; i < coefficients.length; i++) {
+            coefficients[i] = this.getCoefficient(i);
+        }
+        
+        return new ComplexPolynomial(coefficients);
+    }
+    
+    public ComplexPolynomial getConjugate() {
+        final ComplexNumber[] coefficients = new ComplexNumber[length()];
+        
+        for (int i = 0; i < coefficients.length; i++) {
+            coefficients[i] = this.coefficients[i].getConjugate();
+        }
+        
+        return new ComplexPolynomial(coefficients);
+    }
+    
     public int length() {
         return coefficients.length;
     }

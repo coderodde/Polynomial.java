@@ -427,14 +427,17 @@ public final class Polynomial {
         return integrate(BigDecimal.ZERO);
     }
     
-    Polynomial adjustPolynomial() {
+    Polynomial minimizeDegree(final BigDecimal zeroEpsilon) {
         int d = degree;
         
         for (; d >= 0; d--) {
             final BigDecimal coefficient = getCoefficient(d);
             
-            if (!isZero(coefficient)) {
+            if (!isZero(coefficient, zeroEpsilon)) {
                 break;
+            } else {
+                // Remove the term with zero coefficient:
+                coefficientMap.remove(d);
             }
         }
         
@@ -654,7 +657,7 @@ public final class Polynomial {
         public Builder add(final int coefficientIndex,
                            final BigDecimal coefficient) {
             
-            if (isZero(coefficient)) {
+            if (isZero(coefficient, BigDecimal.ZERO)) {
                 return this;
             }
             
@@ -759,7 +762,12 @@ public final class Polynomial {
         }
     }
     
-    private static boolean isZero(final BigDecimal bd) {
-        return BigDecimal.ZERO.setScale(bd.scale()).equals(bd);
+    private static boolean isZero(BigDecimal bd, 
+                                  final BigDecimal zeroEpsilon) {
+        if (bd.compareTo(BigDecimal.ZERO) < 0) {
+            bd = bd.abs();
+        }
+        
+        return bd.compareTo(zeroEpsilon) < 0;
     }
 }

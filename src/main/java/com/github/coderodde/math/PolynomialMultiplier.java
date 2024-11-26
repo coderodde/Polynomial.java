@@ -11,6 +11,8 @@ import java.util.Arrays;
  */
 public final class PolynomialMultiplier {
     
+    public static final BigDecimal DEFAULT_EPSILON = BigDecimal.valueOf(0.01);
+    
     /**
      * Multiplies {@code p1} and {@code p2} naively in {@code O(NM)} time.
      * 
@@ -64,11 +66,13 @@ public final class PolynomialMultiplier {
      * 
      * @param p1 the first polynomial.
      * @param p2 the second polynomial.
+     * @param epsilon the epsilon value for detecting zero coefficients.
      * 
      * @return the product of the two input polynomials.
      */
     public static Polynomial multiplyViaKaratsuba(Polynomial p1,
-                                                  Polynomial p2) {
+                                                  Polynomial p2,
+                                                  final BigDecimal epsilon) {
         
         final int n = Math.max(p1.length(), 
                                p2.length());
@@ -78,7 +82,22 @@ public final class PolynomialMultiplier {
         
         final Polynomial rawPolynomial = multiplyViaKaratsubaImpl(p1, p2);
         
-        return rawPolynomial.adjustPolynomial();
+        return rawPolynomial.minimizeDegree(epsilon);
+    }
+    
+    /**
+     * Delegates the multiplication 
+     * {@link #multiplyViaKaratsuba(com.github.coderodde.math.Polynomial, com.github.coderodde.math.Polynomial, java.math.BigDecimal)}.
+     * Uses the default epsilon value of {@code 0.01} for zero comparisons.
+     * 
+     * @param p1 the first polynomial.
+     * @param p2 the second polynomial.
+     * 
+     * @return the product of the two input polynomials.
+     */
+    public static Polynomial multiplyViaKaratsuba(Polynomial p1,
+                                                  Polynomial p2) {
+        return multiplyViaKaratsuba(p1, p2, DEFAULT_EPSILON);
     }
     
     /**
@@ -90,11 +109,13 @@ public final class PolynomialMultiplier {
      * 
      * @param p1 the first polynomial.
      * @param p2 the second polynomial.
+     * @param epsilon the epsilon value for detecting zero coefficients.
      * 
      * @return the product of the two input polynomials.
      */
     public static Polynomial multiplyViaFFT(Polynomial p1,
-                                            Polynomial p2) {
+                                            Polynomial p2,
+                                            final BigDecimal epsilon) {
         
         final int length = Math.max(p1.length(), 
                                     p2.length());
@@ -109,9 +130,23 @@ public final class PolynomialMultiplier {
         final ComplexPolynomial c = multiplyPointwise(a, b);
         final ComplexPolynomial r = computeInverseFFT(c);
         
-        divide(r, n);
+        return r.convertToPolynomial().minimizeDegree(epsilon);
+    }
+    
+    /**
+     * Delegates the multiplication 
+     * {@link #multiplyViaFFT(com.github.coderodde.math.Polynomial, com.github.coderodde.math.Polynomial, java.math.BigDecimal)}.
+     * Uses the default epsilon value of {@code 0.01} for zero comparisons.
+     * 
+     * @param p1 the first polynomial.
+     * @param p2 the second polynomial.
+     * 
+     * @return the product of the two input polynomials.
+     */
+    public static Polynomial multiplyViaFFT(final Polynomial p1,
+                                            final Polynomial p2) {
         
-        return r.convertToPolynomial();
+        return multiplyViaFFT(p1, p2, DEFAULT_EPSILON);
     }
     
     private static ComplexPolynomial 
@@ -168,42 +203,42 @@ public final class PolynomialMultiplier {
     }
     
     private static ComplexPolynomial 
-        computeInverseFFT(final ComplexPolynomial complexPolynomial) {
-            
-        final int n = complexPolynomial.length();
+        computeInverseFFT(ComplexPolynomial complexPolynomial) {
         
-        if (n == 1) {
-            return complexPolynomial;
-        }
+        complexPolynomial = complexPolynomial.getConjugate();
+        complexPolynomial = computeFFT(complexPolynomial);
+        complexPolynomial = complexPolynomial.getConjugate();
+        divide(complexPolynomial, complexPolynomial.length());
+        return complexPolynomial;
         
-        ComplexNumber omega = ComplexNumber.one(); 
-        
-        final ComplexNumber root  = 
-                ComplexNumber.getPrincipalRootOfUnity(n).getConjugate();
-        
-        final ComplexPolynomial[] a = complexPolynomial.split();
-        final ComplexPolynomial a0  = a[0];
-        final ComplexPolynomial a1  = a[1];
-        
-        final ComplexPolynomial y0 = computeFFT(a0);
-        final ComplexPolynomial y1 = computeFFT(a1);
-        final ComplexPolynomial y  = new ComplexPolynomial(n);
-        
-        for (int k = 0; k < n / 2; k++) {
-            final ComplexNumber y0k = y0.getCoefficient(k);
-            final ComplexNumber y1k = y1.getCoefficient(k);
-            
-            y.setCoefficient(k,         
-                             y0k.add(omega.multiply(y1k)));
-            
-            y.setCoefficient(k + n / 2, 
-                             y0k.substract(omega.multiply(y1k)));
-            
-            omega = omega.multiply(root);
-        }
+//        ComplexNumber omega = ComplexNumber.one(); 
 //        
-//        divide(y, n);
-        return y;
+//        final ComplexNumber root  = 
+//                ComplexNumber.getPrincipalRootOfUnity(n).getConjugate();
+//        
+//        final ComplexPolynomial[] a = complexPolynomial.split();
+//        final ComplexPolynomial a0  = a[0];
+//        final ComplexPolynomial a1  = a[1];
+//        
+//        final ComplexPolynomial y0 = computeFFT(a0);
+//        final ComplexPolynomial y1 = computeFFT(a1);
+//        final ComplexPolynomial y  = new ComplexPolynomial(n);
+//        
+//        for (int k = 0; k < n / 2; k++) {
+//            final ComplexNumber y0k = y0.getCoefficient(k);
+//            final ComplexNumber y1k = y1.getCoefficient(k);
+//            
+//            y.setCoefficient(k,         
+//                             y0k.add(omega.multiply(y1k)));
+//            
+//            y.setCoefficient(k + n / 2, 
+//                             y0k.substract(omega.multiply(y1k)));
+//            
+//            omega = omega.multiply(root);
+//        }
+////        
+////        divide(y, n);
+//        return y;
     }
         
     private static void divide(final ComplexPolynomial cp, 

@@ -20,18 +20,20 @@ public final class Utils {
     /**
      * Maps each digit character to its superscript counterpart.
      */
-    private static final Map<Character, Character>
+    private static final Map<Character, String>
             MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT = new HashMap<>(10);
     
     static {
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('2', '²');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('3', '³');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('4', '\u2074');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('5', '\u2075');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('6', '\u2076');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('7', '\u2077');
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('8', '\u2078');  
-        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('9', '\u2079');   
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('0', "");
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('1', "");
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('2', "²");
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('3', "³");
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('4', "\u2074");
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('5', "\u2075");
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('6', "\u2076");
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('7', "\u2077");
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('8', "\u2078");  
+        MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.put('9', "\u2079");   
     }
     
     public static Polynomial getRandomPolynomial(final Random random) {
@@ -102,7 +104,7 @@ public final class Utils {
         
         for (int i = 0; i < powStringLength; i++) {
             final char ch = powString.charAt(i);
-            final char nextChar = MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.get(ch);
+            final String nextChar = MAP_DIGIT_CHARACTER_TO_SUPERSCRIPT.get(ch);
             sb.append(nextChar);
         }
         

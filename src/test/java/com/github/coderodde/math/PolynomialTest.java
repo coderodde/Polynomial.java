@@ -246,14 +246,16 @@ public final class PolynomialTest {
         
         // (2x + 3) (4x - 5) = 8x^2 - 10x + 12x - 15
         // = 8x^2 + 2x - 15
-        Polynomial r = PolynomialMultiplier.multiplyViaFFT(a, b)
-                                           .setScale(2, RoundingMode.HALF_EVEN)
-                                           .adjustPolynomial();
+        Polynomial r = 
+                PolynomialMultiplier
+                        .multiplyViaFFT(a, b)
+                        .setScale(2, RoundingMode.HALF_EVEN)
+                        .minimizeDegree(BigDecimal.valueOf(0.01));
+        
         Polynomial expected = 
-                Polynomial.getPolynomialBuilder()
-                          .withLongs(-15, 2, 8)
-                          .build()
-                          .setScale(2);
+                PolynomialMultiplier.multiplyViaNaive(a, b)
+                          .setScale(2, RoundingMode.HALF_EVEN)
+                          .minimizeDegree(BigDecimal.valueOf(0.01));
         
         assertEquals(expected, r);
     }
@@ -281,11 +283,13 @@ public final class PolynomialTest {
                 PolynomialMultiplier
                         .multiplyViaFFT(p1, p2)
                         .setScale(2, RoundingMode.HALF_UP)
-                        .adjustPolynomial();
+                        .minimizeDegree(BigDecimal.valueOf(0.01));
         
-        Polynomial expected = Polynomial.getPolynomialBuilder()
-                                        .withLongs(12, -5, 2, 1)
-                                        .build();
+        Polynomial expected =
+                PolynomialMultiplier
+                        .multiplyViaNaive(p1, p2)
+                        .setScale(2, RoundingMode.HALF_UP)
+                        .minimizeDegree(BigDecimal.valueOf(0.01));
         
         System.out.println("product  = " + product);
         System.out.println("expected = " + expected);
@@ -519,7 +523,7 @@ public final class PolynomialTest {
     }
     
     @Test
-    public void bruteForceKaratsubaVsFFT() {
+    public void bruteForceNaiveVsFFT() {
         final Random random = new Random(13L);
         final BigDecimal epsilon = BigDecimal.valueOf(0.01);
         
@@ -535,7 +539,11 @@ public final class PolynomialTest {
             final Polynomial product2 = 
                     PolynomialMultiplier
                             .multiplyViaFFT(p1,
-                                            p2).setScale(2);
+                                            p2).minimizeDegree(BigDecimal.valueOf(0.01))
+                                               .setScale(2);
+            
+            System.out.println(product1);
+            System.out.println(product2);
             
             assertTrue(product1.approximateEquals(product2, epsilon));
         }
