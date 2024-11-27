@@ -61,6 +61,23 @@ public final class Polynomial {
         this.coefficientMap = coefficientMap;
     }
     
+    public Polynomial shrink(final int length) {
+        
+        final Map<Integer, BigDecimal> newCoefficientMap = 
+                new HashMap<>(length);
+        
+        for (final Map.Entry<Integer, BigDecimal> e 
+                : coefficientMap.entrySet()) {
+            
+            if (e.getKey() < length) {
+                newCoefficientMap.put(e.getKey(),
+                                      e.getValue());
+            }
+        }
+        
+        return new Polynomial(length - 1, newCoefficientMap);
+    }
+    
     /**
      * Evaluates this polynomial at the point {@code x} using Horner's rule.
      * 

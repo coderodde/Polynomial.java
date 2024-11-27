@@ -47,18 +47,29 @@ public final class PolynomialDemo {
         
         start = System.currentTimeMillis();
         
-        Polynomial r3 = PolynomialMultiplier.multiplyViaFFT(p1, p2);
+        Polynomial r3 = 
+                PolynomialMultiplier
+                        .multiplyViaFFT(
+                                p1,
+                                p2,
+                                12,
+                                BigDecimal.valueOf(0.01));
         
         end = System.currentTimeMillis();
         
         System.out.printf("FFT: %d milliseconds.\n", end - start);
         
-        System.out.printf("Agree: %b.\n", 
+        System.out.printf("Naïve agrees with Karatsuba and FFT: %b.\n", 
                           r1.approximateEquals(r2, BigDecimal.valueOf(0.1)) &&
                           r1.approximateEquals(r3, BigDecimal.valueOf(0.1)));
         
-        System.out.println(r1);
-        System.out.println(r3);
+        r3 = r3.shrink(2 * POLYNOMIAL_LENGTH - 1).setScale(0);
+        
+        System.out.println(
+                "Naïve output: " + r1.toString().substring(0, 80) + "...");
+        
+        System.out.println(
+                "FFT output: " + r3.toString().substring(0, 80) + "...");
     }
     
     private static void warmup() {
