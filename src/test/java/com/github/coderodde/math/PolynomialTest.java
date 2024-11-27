@@ -33,18 +33,6 @@ public final class PolynomialTest {
     }
     
     @Test
-    public void tryFakeDegree() {
-        Polynomial p = 
-                Polynomial.getPolynomialBuilder()
-                          .add(0, 2)
-                          .add(1, BigDecimal.valueOf(0.0))
-                          .add(2, BigDecimal.valueOf(0))
-                          .build();
-        
-        assertEquals(0, p.getDegree());
-    }
-    
-    @Test
     public void getCoefficient() {
         Polynomial p = Polynomial.getPolynomialBuilder()
                                  .withLongs(1, 2, 3, 4)
@@ -291,9 +279,6 @@ public final class PolynomialTest {
                         .setScale(2, RoundingMode.HALF_UP)
                         .minimizeDegree(BigDecimal.valueOf(0.01));
         
-        System.out.println("product  = " + product);
-        System.out.println("expected = " + expected);
-        
         product  = product .setScale(2);
         expected = expected.setScale(2);
         
@@ -399,7 +384,7 @@ public final class PolynomialTest {
                       .add(2, BigDecimal.ZERO)
                       .build();
         
-        assertEquals(1, p.getDegree());
+        assertEquals(2, p.getDegree());
         
         p = Polynomial.getPolynomialBuilder()
                       .add(1, BigDecimal.ONE)
@@ -407,7 +392,7 @@ public final class PolynomialTest {
                       .add(4, BigDecimal.ZERO.setScale(1))
                       .build();
         
-        assertEquals(1, p.getDegree());
+        assertEquals(4, p.getDegree());
         
         p = Polynomial.getPolynomialBuilder()
                       .add(1, BigDecimal.ONE)
@@ -417,7 +402,7 @@ public final class PolynomialTest {
                       .add(7, BigDecimal.ZERO)
                       .build();
         
-        assertEquals(5, p.getDegree());
+        assertEquals(7, p.getDegree());
     }
     
     @Test
@@ -530,7 +515,7 @@ public final class PolynomialTest {
         for (int iter = 0; iter < 100; iter++) {
             final Polynomial p1 = getRandomPolynomial(random).setScale(4);
             final Polynomial p2 = getRandomPolynomial(random).setScale(4);
-            System.out.println("iter = " + iter);
+            
             final Polynomial product1 = 
                     PolynomialMultiplier
                             .multiplyViaNaive(p1,
@@ -539,11 +524,9 @@ public final class PolynomialTest {
             final Polynomial product2 = 
                     PolynomialMultiplier
                             .multiplyViaFFT(p1,
-                                            p2).minimizeDegree(BigDecimal.valueOf(0.01))
-                                               .setScale(2);
-            
-            System.out.println(product1);
-            System.out.println(product2);
+                                            p2)
+                            .minimizeDegree(BigDecimal.valueOf(0.01))
+                            .setScale(2);
             
             assertTrue(product1.approximateEquals(product2, epsilon));
         }

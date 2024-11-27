@@ -1,6 +1,7 @@
 package com.github.coderodde.math;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * This class implements basic facilities for dealing with complex number in the
@@ -57,6 +58,18 @@ public final class ComplexNumber {
      */
     public ComplexNumber(final BigDecimal realPart) {
         this(realPart, BigDecimal.ZERO);
+    }
+    
+    public ComplexNumber setScale(final int scale,
+                                  final RoundingMode roundingMode) {
+        
+        return new ComplexNumber(realPart.setScale(scale, roundingMode),
+                                 imagPart.setScale(scale, roundingMode));
+    }
+    
+    public ComplexNumber setScale(final int scale) {
+        return setScale(scale, 
+                        RoundingMode.HALF_UP);
     }
     
     public BigDecimal getRealPart() {

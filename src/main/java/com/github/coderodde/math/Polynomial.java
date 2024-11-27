@@ -291,13 +291,11 @@ public final class Polynomial {
             return false;
         }
         
-        if (getDegree() != other.getDegree()) {
-            return false;
-        }
+        final int len = Math.max(this.length(), other.length());
         
-        for (int i = 0; i < length(); i++) {
-            final BigDecimal coefficient1 = getCoefficient(i);
-            final BigDecimal coefficient2 = other.getCoefficient(i);
+        for (int i = 0; i < len; i++) {
+            final BigDecimal coefficient1 = getCoefficientInternal(i);
+            final BigDecimal coefficient2 = other.getCoefficientInternal(i);
             
             if (!approximatelyEquals(coefficient1,
                                      coefficient2, 
@@ -596,29 +594,13 @@ public final class Polynomial {
         return new Polynomial(requestedLength - 1, 
                               nextCoefficientMap);
     }
-//    
-//    private int computeDegree() {
-//        for (int i = degree; i >= 0; i--) {
-//            final BigDecimal coefficient = getCoefficient(i);
-//            final int coefficientScale = coefficient.scale();
-//            final BigDecimal MY_ZERO = 
-//                    BigDecimal.ZERO.setScale(coefficientScale);
-//            
-//            if (!coefficient.equals(MY_ZERO)) {
-//                return i;
-//            }
-//        }
-//        
-//        return 0;
-//    }
-    
     
     private static boolean approximatelyEquals(final BigDecimal bd1,
                                                final BigDecimal bd2,
                                                final BigDecimal epsilon) {
-        BigDecimal diff = bd1.subtract(bd2);
-        diff = diff.abs();
-        return diff.compareTo(epsilon) < 0;
+        return bd1.subtract(bd2)
+                  .abs()
+                  .compareTo(epsilon) < 0;
     }
     
     /**
@@ -656,10 +638,6 @@ public final class Polynomial {
          */
         public Builder add(final int coefficientIndex,
                            final BigDecimal coefficient) {
-            
-            if (isZero(coefficient, BigDecimal.ZERO)) {
-                return this;
-            }
             
             this.maximumDegree = 
                     Math.max(this.maximumDegree,

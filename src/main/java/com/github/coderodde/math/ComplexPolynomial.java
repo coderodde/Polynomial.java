@@ -30,6 +30,16 @@ public final class ComplexPolynomial {
         this.coefficients = coefficients;
     }
     
+    public ComplexPolynomial setScale(final int scale) {
+        final ComplexNumber[] coefficients = new ComplexNumber[length()];
+        
+        for (int i = 0; i < coefficients.length; i++) {
+            coefficients[i] = this.coefficients[i].setScale(scale);
+        }
+        
+        return new ComplexPolynomial(coefficients);
+    }
+    
     public ComplexPolynomial shrinkToHalf() {
         final ComplexNumber[] coefficients = new ComplexNumber[length() / 2];
         

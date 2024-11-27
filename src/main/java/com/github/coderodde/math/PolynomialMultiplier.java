@@ -12,6 +12,7 @@ import java.util.Arrays;
 public final class PolynomialMultiplier {
     
     public static final BigDecimal DEFAULT_EPSILON = BigDecimal.valueOf(0.01);
+    public static final int DEFAULT_SCALE = 6;
     
     /**
      * Multiplies {@code p1} and {@code p2} naively in {@code O(NM)} time.
@@ -109,12 +110,14 @@ public final class PolynomialMultiplier {
      * 
      * @param p1 the first polynomial.
      * @param p2 the second polynomial.
+     * @param scale the scale to use for {@link java.math.BigDecimal} values.
      * @param epsilon the epsilon value for detecting zero coefficients.
      * 
      * @return the product of the two input polynomials.
      */
     public static Polynomial multiplyViaFFT(Polynomial p1,
                                             Polynomial p2,
+                                            final int scale,
                                             final BigDecimal epsilon) {
         
         final int length = Math.max(p1.length(), 
@@ -125,10 +128,10 @@ public final class PolynomialMultiplier {
         p1 = p1.setLength(n);
         p2 = p2.setLength(n);
         
-        final ComplexPolynomial a = computeFFT(new ComplexPolynomial(p1));
-        final ComplexPolynomial b = computeFFT(new ComplexPolynomial(p2));
-        final ComplexPolynomial c = multiplyPointwise(a, b);
-        final ComplexPolynomial r = computeInverseFFT(c);
+        ComplexPolynomial a = computeFFT(new ComplexPolynomial(p1), scale);
+        ComplexPolynomial b = computeFFT(new ComplexPolynomial(p2), scale);
+        ComplexPolynomial c = multiplyPointwise(a, b);
+        ComplexPolynomial r = computeInverseFFT(c, scale);
         
         return r.convertToPolynomial().minimizeDegree(epsilon);
     }
@@ -146,7 +149,7 @@ public final class PolynomialMultiplier {
     public static Polynomial multiplyViaFFT(final Polynomial p1,
                                             final Polynomial p2) {
         
-        return multiplyViaFFT(p1, p2, DEFAULT_EPSILON);
+        return multiplyViaFFT(p1, p2, DEFAULT_SCALE, DEFAULT_EPSILON);
     }
     
     private static ComplexPolynomial 
@@ -166,24 +169,28 @@ public final class PolynomialMultiplier {
     }
     
     private static ComplexPolynomial 
-        computeFFT(final ComplexPolynomial complexPolynomial) {
+        computeFFT(final ComplexPolynomial complexPolynomial,
+                   final int scale) {
             
         final int n = complexPolynomial.length();
         
         if (n == 1) {
-            return complexPolynomial;
+            return complexPolynomial.setScale(scale);
         }
         
         ComplexNumber omega = ComplexNumber.one(); 
         
-        final ComplexNumber root  = ComplexNumber.getPrincipalRootOfUnity(n);
+        final ComplexNumber root  = 
+                ComplexNumber
+                        .getPrincipalRootOfUnity(n)
+                        .setScale(scale);
         
         final ComplexPolynomial[] a = complexPolynomial.split();
         final ComplexPolynomial a0  = a[0];
         final ComplexPolynomial a1  = a[1];
         
-        final ComplexPolynomial y0 = computeFFT(a0);
-        final ComplexPolynomial y1 = computeFFT(a1);
+        final ComplexPolynomial y0 = computeFFT(a0, scale);
+        final ComplexPolynomial y1 = computeFFT(a1, scale);
         final ComplexPolynomial y  = new ComplexPolynomial(n);
         
         for (int k = 0; k < n / 2; k++) {
@@ -191,54 +198,28 @@ public final class PolynomialMultiplier {
             final ComplexNumber y1k = y1.getCoefficient(k);
             
             y.setCoefficient(k,         
-                             y0k.add(omega.multiply(y1k)));
+                             y0k.add(omega.multiply(y1k)).setScale(scale));
             
             y.setCoefficient(k + n / 2, 
-                             y0k.substract(omega.multiply(y1k)));
+                             y0k.substract(
+                                     omega.multiply(y1k))
+                                          .setScale(scale));
             
-            omega = omega.multiply(root);
+            omega = omega.multiply(root).setScale(scale);
         }
         
         return y;
     }
     
     private static ComplexPolynomial 
-        computeInverseFFT(ComplexPolynomial complexPolynomial) {
+        computeInverseFFT(ComplexPolynomial complexPolynomial,
+                          final int scale) {
         
         complexPolynomial = complexPolynomial.getConjugate();
-        complexPolynomial = computeFFT(complexPolynomial);
+        complexPolynomial = computeFFT(complexPolynomial, scale);
         complexPolynomial = complexPolynomial.getConjugate();
         divide(complexPolynomial, complexPolynomial.length());
-        return complexPolynomial;
-        
-//        ComplexNumber omega = ComplexNumber.one(); 
-//        
-//        final ComplexNumber root  = 
-//                ComplexNumber.getPrincipalRootOfUnity(n).getConjugate();
-//        
-//        final ComplexPolynomial[] a = complexPolynomial.split();
-//        final ComplexPolynomial a0  = a[0];
-//        final ComplexPolynomial a1  = a[1];
-//        
-//        final ComplexPolynomial y0 = computeFFT(a0);
-//        final ComplexPolynomial y1 = computeFFT(a1);
-//        final ComplexPolynomial y  = new ComplexPolynomial(n);
-//        
-//        for (int k = 0; k < n / 2; k++) {
-//            final ComplexNumber y0k = y0.getCoefficient(k);
-//            final ComplexNumber y1k = y1.getCoefficient(k);
-//            
-//            y.setCoefficient(k,         
-//                             y0k.add(omega.multiply(y1k)));
-//            
-//            y.setCoefficient(k + n / 2, 
-//                             y0k.substract(omega.multiply(y1k)));
-//            
-//            omega = omega.multiply(root);
-//        }
-////        
-////        divide(y, n);
-//        return y;
+        return complexPolynomial.setScale(scale);
     }
         
     private static void divide(final ComplexPolynomial cp, 
