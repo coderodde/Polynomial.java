@@ -52,7 +52,7 @@ public final class PolynomialDemo {
                         .multiplyViaFFT(
                                 p1,
                                 p2,
-                                12,
+                                9,
                                 BigDecimal.valueOf(0.01));
         
         end = System.currentTimeMillis();
@@ -69,7 +69,7 @@ public final class PolynomialDemo {
                 "Naïve output: " + r1.toString().substring(0, 80) + "...");
         
         System.out.println(
-                "FFT output: " + r3.toString().substring(0, 80) + "...");
+                "FFT output:   " + r3.toString().substring(0, 80) + "...");
     }
     
     private static void warmup() {
